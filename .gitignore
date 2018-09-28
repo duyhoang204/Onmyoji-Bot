@@ -1,0 +1,6 @@
+.idea/
+LICENSE
+__pycache__/
+logs/
+test.*
+test/
