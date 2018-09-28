@@ -1,0 +1,8 @@
+opencv-python
+numpy
+python3_xlib
+pyautogui
+pypiwin32
+pywin32
+pytesseract
+Pillow
