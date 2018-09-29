@@ -277,6 +277,7 @@ def buff_off(buffs=list()):
 def main_task(run_time, start_time=time.time(), hwnd=None):
     try:
         do_main_loop(run_time=run_time, start_time=start_time, hwnd=hwnd)
+        FINISHED_MAIN_LOOP = True
     except:
         # Exit the game
         logger.error("!!!! BOT HAS COUNTER SOME ERROR!!! QUITTING...")
