@@ -32,7 +32,7 @@ class BotConfig(object):
     def should_fight_boss(self):
         return int(self.get_property("General", "fight_boss"))
 
-    def get_payk_image(self):
+    def get_payk_images(self):
         return self.get_property("General", "fight_payk")
 
 

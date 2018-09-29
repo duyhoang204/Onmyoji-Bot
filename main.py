@@ -326,10 +326,12 @@ def do_main_loop(run_time, start_time=time.time(), hwnd=None):
         #     break
 
         # Check for payk
-        payk_img = bot_cfg.get_payk_image()
-        if payk_img is not None and len(payk_img) > 0:
+        payk_config = bot_cfg.get_payk_images()
+        payk_arr = payk_config.split(',') if payk_config else []
+        for payk_img in payk_arr:
+            payk_img = payk_img.strip() + ".png"
             if screen_processor.abs_search(payk_img, click=True)[0] != -1:
-                logger.info("Found payk {}".format(payk_img))
+                logger.info("Found {} in map!".format(payk_img))
 
                 # Close map popup
                 emu_manager.mouse_click(1042, 182)
@@ -513,11 +515,13 @@ def do_realm_battle(i, j, row, retry=False):
 def go_to_explore_screen():
     # Go to explore screen from login screen
     while screen_processor.abs_search("main_scr_buff.png")[0] == -1:
-        if screen_processor.abs_search("login_announcement.png")[0] != -1:
+        if screen_processor.abs_search("login_announcement.png", precision=0.9)[0] != -1:
             emu_manager.mouse_click(*CLOSE_ANNOUNCEMENT_BTN)
+            time.sleep(1)
+        time.sleep(1.5)
         emu_manager.mouse_click(*LOGIN_BTN)
 
-    time.sleep(10)
+    time.sleep(15)
     emu_manager.mouse_click(*EXPLORE_BTN)
 
 if __name__ == "__main__":
