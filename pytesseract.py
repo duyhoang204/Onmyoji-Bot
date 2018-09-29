@@ -3,6 +3,7 @@
 '''
 Python-tesseract. For more information: https://github.com/madmaze/pytesseract
 '''
+from bot_config import BotConfig
 
 try:
     import Image
@@ -25,7 +26,7 @@ if numpy_installed:
     from numpy import ndarray
 
 # CHANGE THIS IF TESSERACT IS NOT IN YOUR PATH, OR IS NAMED DIFFERENTLY
-tesseract_cmd = 'C:\\Program Files (x86)\\Tesseract-OCR\\tesseract'
+tesseract_cmd = BotConfig().get_property("Emulator", "tesseract_path")
 RGB_MODE = 'RGB'
 OSD_KEYS = {
     'Page number': ('page_num', int),
