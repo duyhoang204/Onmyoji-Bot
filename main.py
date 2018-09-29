@@ -357,7 +357,7 @@ def do_main_loop(run_time, start_time=time.time(), hwnd=None):
                 while screen_processor.abs_search("back.png", BACK_BTN_BOX)[0] == -1:
                     time.sleep(0.5)
                     # Click center of the screen with some offset
-                    emu_manager.mouse_click(663, 317)
+                    emu_manager.mouse_click(*MAP_20)
                 logger.info("Got back to map from payk battle!")
                 continue
 
