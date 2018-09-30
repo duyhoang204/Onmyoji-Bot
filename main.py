@@ -340,8 +340,8 @@ def do_main_loop(run_time, start_time=time.time(), hwnd=None):
                 # Click again
                 screen_processor.abs_search(payk_img, click=True)
 
-                while screen_processor.abs_search("payk_fight_btn.png", click=True)[0] == -1:
-                    time.sleep(0.5)
+                # while screen_processor.abs_search("payk_fight_btn.png", click=True)[0] == -1:
+                time.sleep(5)
 
                 # if screen_processor.abs_search("payk_fight_btn.png", click=True)[0] != -1:
                 logger.info("Creating party for payk")
