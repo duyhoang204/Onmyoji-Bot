@@ -348,7 +348,7 @@ def do_main_loop(run_time, start_time=time.time(), hwnd=None):
                 time.sleep(0.5)
                 emu_manager.mouse_click(*PARTY_INVITE_ALL)
                 emu_manager.mouse_click(*PARTY_CREATE_BTN)
-                while screen_processor.abs_search("realm_back_btn.png")[0] == 1:
+                while screen_processor.abs_search("realm_back_btn.png")[0] == -1:
                     emu_manager.mouse_click(*PARTY_START)
                 logger.info("Starting payk battle..")
                 emu_manager.mouse_click(*BATTLE_START_BTN)
@@ -499,7 +499,7 @@ def do_realm_battle(i, j, row, retry=False):
     # emu_manager.mouse_click(*REALM_SELECT_TEAM_BTN)
 
     while screen_processor.abs_search("auto_icon.png", (0, WINDOW_HEIGHT - 300, 300, WINDOW_HEIGHT))[0] == -1:
-        emu_manager.mouse_click(*BATTLE_START_BTN, 3)
+        emu_manager.mouse_click(*BATTLE_START_BTN, sleep=3)
 
     while screen_processor.abs_search("realm_reward_icon.png")[0] == -1:
         # Click a random place
