@@ -291,6 +291,7 @@ def do_main_loop(run_time, start_time=time.time(), hwnd=None):
     logger.info("Starting main task...")
     # test()
     time.sleep(1)
+    mystic_shop_ts = 0
 
     # Turn on buff
     buffs = bot_cfg.get_buff_config()
@@ -306,7 +307,77 @@ def do_main_loop(run_time, start_time=time.time(), hwnd=None):
             emu_manager.mouse_click(MAP_20[0], MAP_20[1])
             time.sleep(0.5)
 
-        # Check for realm tickets first
+        # Check for payk
+        payk_config = bot_cfg.get_payk_images()
+        payk_arr = payk_config.split(',') if payk_config else []
+        for payk_img in payk_arr:
+            payk_img = payk_img.strip() + ".png"
+            if screen_processor.abs_search(payk_img)[0] != -1:
+                logger.info("Found {} in map!".format(payk_img))
+
+                # Close map popup
+                emu_manager.mouse_click(1042, 182)
+                time.sleep(1)
+                # Click again
+                screen_processor.abs_search(payk_img, click=True)
+
+                # while screen_processor.abs_search("payk_fight_btn.png", click=True)[0] == -1:
+                time.sleep(5)
+
+                # if screen_processor.abs_search("payk_fight_btn.png", click=True)[0] != -1:
+                logger.info("Creating party for payk")
+                time.sleep(0.5)
+                emu_manager.mouse_click(*PAYK_FIGHT)
+                time.sleep(1)
+                emu_manager.mouse_click(*PARTY_INVITE_ALL)
+                emu_manager.mouse_click(*PARTY_CREATE_BTN)
+                while screen_processor.abs_search("realm_back_btn.png")[0] == -1:
+                    emu_manager.mouse_click(*PARTY_START)
+                logger.info("Starting payk battle..")
+                emu_manager.mouse_click(*BATTLE_START_BTN)
+
+                # Wait for map
+                while screen_processor.abs_search("back.png", BACK_BTN_BOX)[0] == -1:
+                    time.sleep(0.5)
+                    # Click center of the screen with some offset
+                    emu_manager.mouse_click(*MAP_20)
+                logger.info("Got back to map from payk battle!")
+                continue
+
+        # Check for shop
+        if time.time() - mystic_shop_ts > 60*30 \
+            and screen_processor.abs_search("mystic_shop.png")[0] != -1:
+            # Close map popup
+            emu_manager.mouse_click(1042, 182)
+            time.sleep(1)
+            # Click again
+            screen_processor.abs_search("mystic_shop.png", click=True)
+            # Wait for camera to pan
+            time.sleep(5)
+
+            items = bot_cfg.get_property("General", "mystic_shop_items").split(",")
+            for item in items:
+                image = item.strip() + ".png"
+                if screen_processor.abs_search(image, click=True)[0] != -1:
+                    time.sleep(1)
+
+                    # Click confirm
+                    logger.info("Click 1")
+                    screen_processor.abs_search("base_btn_corner.png", click=True)
+                    time.sleep(1.5)
+                    # Click outside to close popup
+                    logger.info("Click 2")
+
+                    emu_manager.mouse_click(666, 646)
+
+            # Go back to map
+            emu_manager.mouse_click(54, 87)
+
+            mystic_shop_ts = time.time()
+            continue
+
+
+        # Check for realm tickets
         if realm_obj.is_max_tickets(MAP_PANEL_DISPLAY):
             if int(bot_cfg.get_property("Realm", "stop_map_farming_when_full_ticket")):
                 # Quit farming
@@ -326,40 +397,7 @@ def do_main_loop(run_time, start_time=time.time(), hwnd=None):
         #     # Finish
         #     break
 
-        # Check for payk
-        payk_config = bot_cfg.get_payk_images()
-        payk_arr = payk_config.split(',') if payk_config else []
-        for payk_img in payk_arr:
-            payk_img = payk_img.strip() + ".png"
-            if screen_processor.abs_search(payk_img, click=True)[0] != -1:
-                logger.info("Found {} in map!".format(payk_img))
 
-                # Close map popup
-                emu_manager.mouse_click(1042, 182)
-                time.sleep(1)
-                # Click again
-                screen_processor.abs_search(payk_img, click=True)
-
-                # while screen_processor.abs_search("payk_fight_btn.png", click=True)[0] == -1:
-                time.sleep(5)
-
-                # if screen_processor.abs_search("payk_fight_btn.png", click=True)[0] != -1:
-                logger.info("Creating party for payk")
-                time.sleep(0.5)
-                emu_manager.mouse_click(*PARTY_INVITE_ALL)
-                emu_manager.mouse_click(*PARTY_CREATE_BTN)
-                while screen_processor.abs_search("realm_back_btn.png")[0] == -1:
-                    emu_manager.mouse_click(*PARTY_START)
-                logger.info("Starting payk battle..")
-                emu_manager.mouse_click(*BATTLE_START_BTN)
-
-                # Wait for map
-                while screen_processor.abs_search("back.png", BACK_BTN_BOX)[0] == -1:
-                    time.sleep(0.5)
-                    # Click center of the screen with some offset
-                    emu_manager.mouse_click(*MAP_20)
-                logger.info("Got back to map from payk battle!")
-                continue
 
         enter_map()
         time.sleep(1)
