@@ -313,8 +313,6 @@ def do_main_loop(run_time, start_time=time.time(), hwnd=None):
         for payk_img in payk_arr:
             payk_img = payk_img.strip() + ".png"
             if screen_processor.abs_search(payk_img)[0] != -1:
-                logger.info("Found {} in map!".format(payk_img))
-
                 # Close map popup
                 emu_manager.mouse_click(1042, 182)
                 time.sleep(1)
@@ -326,9 +324,8 @@ def do_main_loop(run_time, start_time=time.time(), hwnd=None):
 
                 # if screen_processor.abs_search("payk_fight_btn.png", click=True)[0] != -1:
                 logger.info("Creating party for payk")
-                time.sleep(0.5)
                 emu_manager.mouse_click(*PAYK_FIGHT)
-                time.sleep(1)
+                time.sleep(1.5)
                 emu_manager.mouse_click(*PARTY_INVITE_ALL)
                 emu_manager.mouse_click(*PARTY_CREATE_BTN)
                 while screen_processor.abs_search("realm_back_btn.png")[0] == -1:
@@ -342,7 +339,6 @@ def do_main_loop(run_time, start_time=time.time(), hwnd=None):
                     # Click center of the screen with some offset
                     emu_manager.mouse_click(*MAP_20)
                 logger.info("Got back to map from payk battle!")
-                continue
 
         # Check for shop
         if time.time() - mystic_shop_ts > 60*30 \
@@ -376,6 +372,19 @@ def do_main_loop(run_time, start_time=time.time(), hwnd=None):
             mystic_shop_ts = time.time()
             continue
 
+        # Check for chest
+        if screen_processor.abs_search("chest.png")[0] != -1:
+            # Close map popup
+            emu_manager.mouse_click(1042, 182)
+            time.sleep(1)
+            # Click again
+            screen_processor.abs_search("chest.png", click=True)
+            time.sleep(5)
+            while screen_processor.abs_search("enter_map.png", ENTER_MAP_BOX)[0] == -1:
+                # Click on map 20
+                emu_manager.mouse_click(MAP_20[0], MAP_20[1])
+
+            continue
 
         # Check for realm tickets
         if realm_obj.is_max_tickets(MAP_PANEL_DISPLAY):
