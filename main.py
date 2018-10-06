@@ -14,13 +14,14 @@ import screen_processor
 import util
 from realm import Realm, TICKET_AREAS, MAP_PANEL_DISPLAY, MAX_TICKETS
 
-FINISHED_MAIN_LOOP = False
+FINISHED_MAIN_LOOP = [False]
 debug = 0
 
 realm_obj = Realm()
 bot_cfg = BotConfig()
 
 logger = util.get_logger()
+
 
 def set_up():
     logger.info("Setting up emulator...")
@@ -44,6 +45,7 @@ def set_up():
     win32gui.MoveWindow(hwnd, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, True)
     return hwnd
 
+
 def restart_game():
     # Close app then restart loop
     emu_manager.quit_application(APP_PKG_NAME)
@@ -57,6 +59,7 @@ def restart_game():
         logger.info("Navigating to explore screen...")
         go_to_explore_screen()
         logger.info("Done setting up.")
+
 
 def enter_map():
     # Show map panel
@@ -72,12 +75,13 @@ def enter_map():
     # mouse_click(EXPLORE_BUTTON[0], EXPLORE_BUTTON[1])
     screen_processor.wait("paper_dude.png", PAPER_DUDE_BOX, sleep=1)
     # First move the mouse the right edge of the screen with some offset so it doesn't move outside of the window
-    #TODO hard code
+    # TODO hard code
     emu_manager.mouse_drag(WINDOW_WIDTH - 20, 563, 200, 563, duration=2000)
     time.sleep(2)
     # pyautogui.moveTo(WINDOW_WIDTH-20, 563, 0.2)
     # # Then drag to view map
     # pyautogui.dragRel(-WINDOW_WIDTH+50, 0, 2)
+
 
 def find_mobs_with_buff(buff="exp", fight_boss=False):
     if fight_boss:
@@ -91,9 +95,9 @@ def find_mobs_with_buff(buff="exp", fight_boss=False):
             pos = screen_processor.abs_search("{}_icon_{}.png".format(buff, i), precision=0.85)
             if pos[0] != -1:
                 # Find the closest fight icon in a rectangle surrounding the mob
-                x0 = pos[0] - MOB_BOX[0] / 2 + 15   # add some offset
+                x0 = pos[0] - MOB_BOX[0] / 2 + 15  # add some offset
                 y0 = pos[1] - MOB_BOX[1]
-                x1 = pos[0] + MOB_BOX[0] / 2 + 15   # add some offset
+                x1 = pos[0] + MOB_BOX[0] / 2 + 15  # add some offset
                 y1 = pos[1]
                 mob_rectangle = (x0, y0, x1, y1)
 
@@ -113,6 +117,7 @@ def process_battle(mob_pos, is_boss):
 
     # Wait for the back button to appear
     try:
+        screen_processor.wait("team_battle.png", sleep=0.5, click=False, wait_count=15)
         screen_processor.wait("realm_back_btn.png", sleep=1, click=False, wait_count=15)
     except screen_processor.ImageNotFoundException:
         # We possibly missed the fight button, just return
@@ -150,7 +155,7 @@ def process_battle(mob_pos, is_boss):
         emu_manager.mouse_click(35, 60)
         time.sleep(1.5)
 
-    while screen_processor.abs_search("auto_icon.png", (0, WINDOW_HEIGHT-300, 300, WINDOW_HEIGHT))[0] == -1:
+    while screen_processor.abs_search("auto_icon.png", (0, WINDOW_HEIGHT - 300, 300, WINDOW_HEIGHT))[0] == -1:
         # Ensure we clicked Start Battle
         emu_manager.mouse_click(*BATTLE_START_BTN)
 
@@ -161,7 +166,7 @@ def process_battle(mob_pos, is_boss):
         # Target the left most monster in the front row. This is for single target shiki like Irabaki
         emu_manager.mouse_click(623, 210)
 
-    while screen_processor.abs_search("auto_icon.png", (0, WINDOW_HEIGHT-300, 300, WINDOW_HEIGHT))[0] != -1:
+    while screen_processor.abs_search("auto_icon.png", (0, WINDOW_HEIGHT - 300, 300, WINDOW_HEIGHT))[0] != -1:
         time.sleep(1)
 
     if is_boss:
@@ -172,7 +177,7 @@ def process_battle(mob_pos, is_boss):
 
         logger.info("Won boss battle, searching for rewards...")
         time.sleep(5)
-        for i in range(0,4):
+        for i in range(0, 4):
             if screen_processor.abs_search("boss_reward.png", click=True)[0] != -1:
                 logger.info("Got boss reward #{}".format(i))
                 time.sleep(1)
@@ -200,13 +205,14 @@ def process_battle(mob_pos, is_boss):
         emu_manager.mouse_click(663, 317)
     logger.info("Got back to map from battle!")
 
+
 def process_replace(index):
     logger.info("Processing replacing materials!")
     if 0 < index > 1:
         raise ValueError
 
     # Find a card that's not maxed out,, or locked, or is blue daruma, or is currently in fight
-    while screen_processor.abs_search("max_lvl.png", LAST_CHARACTER_LEVEL_REGION)[0] != -1\
+    while screen_processor.abs_search("max_lvl.png", LAST_CHARACTER_LEVEL_REGION)[0] != -1 \
             or screen_processor.abs_search("in_fight.png", LAST_CHARACTER_LEVEL_REGION)[0] != -1 \
             or screen_processor.abs_search("blue_daruma.png", LAST_CHARACTER_LEVEL_REGION)[0] != -1 \
             or screen_processor.abs_search("locked_food.png", LAST_CHARACTER_LEVEL_REGION)[0] != -1:
@@ -215,7 +221,8 @@ def process_replace(index):
         time.sleep(0.7)
     time.sleep(1)
     # Drag into team
-    emu_manager.mouse_drag(LAST_CHARACTER_CENTER[0], LAST_CHARACTER_CENTER[1], FOOD_LOC_CHANGE[index][0], FOOD_LOC_CHANGE[index][1], duration=1000)
+    emu_manager.mouse_drag(LAST_CHARACTER_CENTER[0], LAST_CHARACTER_CENTER[1], FOOD_LOC_CHANGE[index][0],
+                           FOOD_LOC_CHANGE[index][1], duration=1000)
     time.sleep(2)
     logger.info("Changed character #{}".format(index))
     # Move on to the next card
@@ -223,7 +230,9 @@ def process_replace(index):
                            LAST_CHARACTER_CENTER[0] - CHARACTER_CARD_BOX[0], LAST_CHARACTER_CENTER[1], duration=700)
     time.sleep(1)
 
+
 def buff_on(buffs=list()):
+    logger.info("Turning on buffs...")
     if len(buffs) == 0 or "0" in buffs:
         return
     # Click on buff
@@ -241,7 +250,8 @@ def buff_on(buffs=list()):
                 pass
 
         if buff_pos[0] != -1:
-            pos = screen_processor.abs_search("buff_play.png", (buff_pos[0], buff_pos[1] - 50, 950 , buff_pos[1] + 70), precision=0.7)
+            pos = screen_processor.abs_search("buff_play.png", (buff_pos[0], buff_pos[1] - 50, 950, buff_pos[1] + 70),
+                                              precision=0.7)
             # logger.info("====== {}".format((buff_pos[0], buff_pos[1]-30, 950 ,buff_pos[1]+30)))
             if pos[0] != -1:
                 # Turn it on
@@ -256,6 +266,7 @@ def buff_on(buffs=list()):
 
 
 def buff_off(buffs=list()):
+    logger.info("Turning off buffs...")
     if len(buffs) == 0 or "0" in buffs:
         return
 
@@ -265,7 +276,7 @@ def buff_off(buffs=list()):
     time.sleep(2)
     # Probably have no more than 10 buffs
     for x in range(0, 10):
-        pos = screen_processor.abs_search("buff_pause.png", (301, 110, 933, 574), precision=0.7)
+        pos = screen_processor.abs_search("buff_pause.png", precision=0.7)
         if pos[0] != -1:
             emu_manager.mouse_click(pos[0] + 5, pos[1] + 5)
             time.sleep(0.7)
@@ -273,6 +284,7 @@ def buff_off(buffs=list()):
             break
     # Close
     emu_manager.mouse_click(buff_btn[0], buff_btn[1] - 5, 1)
+
 
 def main_task(run_time, start_time=time.time(), hwnd=None):
     try:
@@ -286,6 +298,7 @@ def main_task(run_time, start_time=time.time(), hwnd=None):
         if not debug:
             restart_game()
             do_main_loop(run_time, start_time)
+
 
 def do_main_loop(run_time, start_time=time.time(), hwnd=None):
     logger.info("Starting main task...")
@@ -334,15 +347,17 @@ def do_main_loop(run_time, start_time=time.time(), hwnd=None):
                 emu_manager.mouse_click(*BATTLE_START_BTN)
 
                 # Wait for map
+                time.sleep(2)
+                while screen_processor.abs_search("auto_icon.png")[0] != -1:
+                    time.sleep(2)
                 while screen_processor.abs_search("back.png", BACK_BTN_BOX)[0] == -1:
-                    time.sleep(5)
+                    emu_manager.mouse_click(*MAP_20)
 
-                emu_manager.mouse_click(*MAP_20)
                 logger.info("Got back to map from payk battle!")
 
         # Check for shop
-        if time.time() - mystic_shop_ts > 60*30 \
-            and screen_processor.abs_search("mystic_shop.png")[0] != -1:
+        if time.time() - mystic_shop_ts > 60 * 30 \
+                and screen_processor.abs_search("mystic_shop.png")[0] != -1:
             # Close map popup
             emu_manager.mouse_click(1042, 182)
             time.sleep(1)
@@ -406,8 +421,6 @@ def do_main_loop(run_time, start_time=time.time(), hwnd=None):
         #     # Finish
         #     break
 
-
-
         enter_map()
         time.sleep(1)
         while True:
@@ -429,15 +442,17 @@ def do_main_loop(run_time, start_time=time.time(), hwnd=None):
 
             time.sleep(1)
 
-    FINISHED_MAIN_LOOP = True
+    time.sleep(3)
     logger.info("Ended main loop. Ran for {} seconds".format(time.time() - start_time))
-    logger.info("Turning off buffs...")
+
     # Turn off exp buff
     buff_off(buffs)
+    FINISHED_MAIN_LOOP[0] = True
+
 
 def kill_popups(run_time, start_time=time.time()):
     logger.info("Start hunting for in-game popup...")
-    while not FINISHED_MAIN_LOOP:
+    while not FINISHED_MAIN_LOOP[0]:
         if screen_processor.abs_search("wanted_4.png", WANTED_2_SEARCH_BOX)[0] != -1:
             # Deny wanted req
             logger.info("WANTED FOUND!")
@@ -452,25 +467,28 @@ def kill_popups(run_time, start_time=time.time()):
         time.sleep(1)
     logger.info("End hunting for in-game popup.")
 
+
 def close_teamviewer_modal(run_time, start_time=time.time()):
     logger.info("Start hunting for teamviewer popup..")
-    while not FINISHED_MAIN_LOOP:
+    while not FINISHED_MAIN_LOOP[0]:
         hwnd = win32gui.FindWindow("#32770", None)
         if hwnd:
             win32gui.CloseWindow(hwnd)
         time.sleep(5)
     logger.info("End hunting for teamviewer popup")
 
+
 def check_main_task_ended(run_time, start_time=time.time()):
     logger.info("Start checking for main task...")
     while (time.time() - start_time) < (run_time + 300):
         time.sleep(10)
 
-    if not FINISHED_MAIN_LOOP:
+    if not FINISHED_MAIN_LOOP[0]:
         logger.info("WE GOT STUCK!!! ABORT TO SAVE THE BUFFS!!!")
         if not debug:
             emu_manager.quit_application(APP_PKG_NAME)
     logger.info("Finished checking for main task.")
+
 
 def enter_realm(start_time, run_time):
     # Turn off buffs
@@ -514,6 +532,7 @@ def enter_realm(start_time, run_time):
             emu_manager.mouse_click(746, 461, 1)
 
         time.sleep(2)
+
 
 def do_realm_battle(i, j, row, retry=False):
     if not retry:
@@ -560,6 +579,7 @@ def do_realm_battle(i, j, row, retry=False):
     # Check win and return
     return screen_processor.abs_search("realm_lost.png", row)[0] == -1, True
 
+
 def go_to_explore_screen():
     # Go to explore screen from login screen
     while screen_processor.abs_search("main_scr_buff.png")[0] == -1:
@@ -571,6 +591,7 @@ def go_to_explore_screen():
 
     time.sleep(15)
     emu_manager.mouse_click(*EXPLORE_BTN)
+
 
 if __name__ == "__main__":
     from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -591,5 +612,3 @@ if __name__ == "__main__":
 
    # emu_manager.mouse_click(1050, 174, 1)
    # enter_realm(time.time(), 3600)
-
-

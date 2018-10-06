@@ -27,7 +27,7 @@ class BotConfig(object):
 
     def get_buff_config(self):
         section = self.get_section("General")
-        return  section.get("buff").split(",")
+        return section.get("buff").split(",")
 
     def should_fight_boss(self):
         return int(self.get_property("General", "fight_boss"))
