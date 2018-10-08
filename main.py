@@ -289,7 +289,6 @@ def buff_off(buffs=list()):
 def main_task(run_time, start_time=time.time(), hwnd=None):
     try:
         do_main_loop(run_time=run_time, start_time=start_time, hwnd=hwnd)
-        FINISHED_MAIN_LOOP = True
     except:
         # Exit the game
         logger.error("!!!! BOT HAS COUNTER SOME ERROR!!! QUITTING...")
@@ -333,16 +332,36 @@ def do_main_loop(run_time, start_time=time.time(), hwnd=None):
                 screen_processor.abs_search(payk_img, click=True)
 
                 # while screen_processor.abs_search("payk_fight_btn.png", click=True)[0] == -1:
-                time.sleep(5)
+                time.sleep(3)
 
                 # if screen_processor.abs_search("payk_fight_btn.png", click=True)[0] != -1:
-                logger.info("Creating party for payk")
-                emu_manager.mouse_click(*PAYK_FIGHT)
-                time.sleep(1.5)
-                emu_manager.mouse_click(*PARTY_INVITE_ALL)
-                emu_manager.mouse_click(*PARTY_CREATE_BTN)
-                while screen_processor.abs_search("realm_back_btn.png")[0] == -1:
-                    emu_manager.mouse_click(*PARTY_START)
+                def create_party():
+                    logger.info("Creating party for payk...")
+                    emu_manager.mouse_click(*PAYK_FIGHT)
+                    time.sleep(1)
+                    emu_manager.mouse_click(*PARTY_INVITE_ALL)
+                    emu_manager.mouse_click(*PARTY_CREATE_BTN)
+                    party_start = time.time()
+                    while screen_processor.abs_search("realm_back_btn.png")[0] == -1:
+                        emu_manager.mouse_click(*PARTY_START)
+                        time.sleep(3)
+                        if (time.time() - party_start) > PARTY_TIME_SECOND:
+                            # No one joined our party :(
+                            logger.info("No one joined, creating new party... :(")
+                            if screen_processor.abs_search("payk_scroll.png")[0] != -1:
+                                # Still legit? Retry
+                                return create_party()
+                            else:
+                                # Click on map 20
+                                emu_manager.mouse_click(MAP_20[0], MAP_20[1])
+                                return False
+                    logger.info("Party created successfully!")
+                    return True
+
+                if not create_party():
+                    logger.info("Create party failed for {}. Skip to next payk search...".format(payk_img))
+                    continue
+
                 logger.info("Starting payk battle..")
                 emu_manager.mouse_click(*BATTLE_START_BTN)
 
