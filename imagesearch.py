@@ -36,10 +36,13 @@ def region_grabber_v2(region, hwnd):
     # left, top, right, bot = region
     w = right - left
     h = bot - top
-
-    hwndDC = win32gui.GetWindowDC(hwnd)
-    mfcDC = win32ui.CreateDCFromHandle(hwndDC)
-    saveDC = mfcDC.CreateCompatibleDC()
+    try:
+        hwndDC = win32gui.GetWindowDC(hwnd)
+        mfcDC = win32ui.CreateDCFromHandle(hwndDC)
+        saveDC = mfcDC.CreateCompatibleDC()
+    except:
+        print("Could not create compatible DC! Retrying..")
+        region_grabber_v2(region, hwnd)
 
     saveBitMap = win32ui.CreateBitmap()
     saveBitMap.CreateCompatibleBitmap(mfcDC, w, h)

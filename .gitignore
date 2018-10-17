@@ -4,5 +4,5 @@ __pycache__/
 logs/
 test.*
 test/
-config.ini
+./config.ini
 venv/

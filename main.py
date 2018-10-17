@@ -293,7 +293,7 @@ def main_task(run_time, start_time=time.time(), hwnd=None):
         # Exit the game
         logger.error("!!!! BOT HAS COUNTER SOME ERROR!!! QUITTING...")
         e_type, val, tb = sys.exc_info()
-        traceback.print_exception(e_type, val, tb, limit=2, file=sys.stdout)
+        traceback.print_exception(e_type, val, tb, limit=10, file=sys.stdout)
         if not debug:
             restart_game()
             do_main_loop(run_time, start_time)
