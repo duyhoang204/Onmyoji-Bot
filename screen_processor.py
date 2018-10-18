@@ -10,7 +10,7 @@ import pytesseract
 import util
 from bot_config import BotConfig
 from common import WINDOW_WIDTH, WINDOW_HEIGHT
-from imagesearch import region_grabber, imagesearcharea, imagesearcharea_v2, region_grabber_v2
+from imagesearch import region_grabber, imagesearcharea, imagesearcharea_v2, region_grabber_v2, image_search_multiple
 from util import click_image
 
 
@@ -78,6 +78,16 @@ def abs_search(file_name, pos_box=None, precision=0.8, get_absolute_pos=True, cl
         return abs_result
 
     return result
+
+
+def abs_search_multi(file_name, pos_box=None, precision=0.99, get_absolute_pos=True, click=False):
+    if not pos_box:
+        pos_box = (0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
+    path = get_image_path(file_name)
+
+    result = image_search_multiple(path, pos_box[0], pos_box[1], pos_box[2], pos_box[3], precision=precision, hwnd=hwnd)
+    logger.info("Found {} monsters in map!".format(len(result)))
+    return [(x[0]+pos_box[0], x[1]+pos_box[1]) for x in result]
 
 
 def wait(img, area=None, click=False, sleep=0.7, wait_count=100, click_offset=(0,0), pre_sleep=0):

@@ -127,9 +127,9 @@ def imagesearcharea_v2(image, x1,y1,x2,y2, precision=0.8, im=None, hwnd=None) :
         else:
             im = region_grabber(region=(x1, y1, x2, y2))
         # Debug
-        # if image == "images/max_lvl.png":
-            # print("Saving image....")
-            # im.save('testarea.png') # useful for debugging purposes, this will save the captured region as "testarea.png"
+        # if "exp" in image:
+        #     print("Saving image....")
+        #     im.save('testarea.png') # useful for debugging purposes, this will save the captured region as "testarea.png"
 
     img_rgb = np.array(im)
     img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
@@ -141,6 +141,25 @@ def imagesearcharea_v2(image, x1,y1,x2,y2, precision=0.8, im=None, hwnd=None) :
         return [-1, -1]
     return max_loc
 
+
+def image_search_multiple(image, x1, y1, x2, y2, precision=0.99, bg_im=None, hwnd=None):
+    if bg_im is None:
+        if hwnd:
+            bg_im = region_grabber_v2(region=(x1, y1, x2, y2), hwnd=hwnd)
+        else:
+            bg_im = region_grabber(region=(x1, y1, x2, y2))
+        # Debug
+        # if image == "images/max_lvl.png":
+            # print("Saving image....")
+            # im.save('testarea.png') # useful for debugging purposes, this will save the captured region as "testarea.png"
+
+    img_rgb = np.array(bg_im)
+    img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
+    template = cv2.imread(image, 0)
+
+    res = cv2.matchTemplate(img_gray, template, cv2.TM_CCOEFF_NORMED)
+    loc = np.where(res >= precision)
+    return list(zip(*loc[::-1]))
 
 '''
 

@@ -107,6 +107,26 @@ def find_mobs_with_buff(buff="exp", fight_boss=False):
                     return fight_pos, False
     return (-1, -1), False
 
+def find_mobs_with_buff_v2(buff="exp", fight_boss=False):
+    if fight_boss:
+        boss_pos = screen_processor.abs_search("boss.png", BOSS_SEARCH_BOX)
+        if boss_pos[0] != -1:
+            return boss_pos, True
+
+    # Find all fight icons first
+    locs = screen_processor.abs_search_multi("fight.png")
+    for loc in locs:
+        # for k in range(0, 2):
+        for i in range(1, 7):
+            # Decrease precision here?
+            pos = screen_processor.abs_search("{}_icon_{}.png".format(buff, i),
+                                              (loc[0]-150, loc[1], loc[0]+150, loc[1]+250),
+                                              precision=0.85)
+            if pos[0] != -1:
+                return loc, False
+
+    return (-1, -1), False
+
 
 def process_battle(mob_pos, is_boss):
     # Unlock team so we can replace farm materials later
@@ -443,7 +463,7 @@ def do_main_loop(run_time, start_time=time.time(), hwnd=None):
         enter_map()
         time.sleep(1)
         while True:
-            mob_pos, is_boss = find_mobs_with_buff(fight_boss=BotConfig().should_fight_boss())
+            mob_pos, is_boss = find_mobs_with_buff_v2(fight_boss=BotConfig().should_fight_boss())
             if mob_pos[0] != -1:
                 process_battle(mob_pos, is_boss)
                 if is_boss:
