@@ -629,5 +629,5 @@ if __name__ == "__main__":
         for f in as_completed(futures):
             rs = f.result()
 
-   # emu_manager.mouse_click(1050, 174, 1)
-   # enter_realm(time.time(), 3600)
+    # emu_manager.mouse_click(1050, 174, 1)
+    # enter_realm(time.time(), 3600)
