@@ -80,13 +80,13 @@ def abs_search(file_name, pos_box=None, precision=0.8, get_absolute_pos=True, cl
     return result
 
 
-def abs_search_multi(file_name, pos_box=None, precision=0.99, get_absolute_pos=True, click=False):
+def abs_search_multi(file_name, pos_box=None, precision=0.99):
     if not pos_box:
         pos_box = (0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
     path = get_image_path(file_name)
 
     result = image_search_multiple(path, pos_box[0], pos_box[1], pos_box[2], pos_box[3], precision=precision, hwnd=hwnd)
-    logger.info("Found {} monsters in map!".format(len(result)))
+    logger.info("Found {} occurrence(s) of {}!".format(len(result), file_name))
     return [(x[0]+pos_box[0], x[1]+pos_box[1]) for x in result]
 
 

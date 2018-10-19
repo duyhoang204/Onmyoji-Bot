@@ -114,7 +114,7 @@ def find_mobs_with_buff_v2(buff="exp", fight_boss=False):
             return boss_pos, True
 
     # Find all fight icons first
-    locs = screen_processor.abs_search_multi("fight.png")
+    locs = screen_processor.abs_search_multi("fight.png", precision=0.98)
     for loc in locs:
         # for k in range(0, 2):
         for i in range(1, 7):
@@ -158,8 +158,8 @@ def process_battle(mob_pos, is_boss):
 
         # "ALL" button
         emu_manager.mouse_click(68, 690, sleep=1)
-
-        food_coord = FOOD_OPTIONS.get(bot_cfg.get_property("General", "food_type"))
+        food_type = bot_cfg.get_property("General", "food_type")
+        food_coord = FOOD_OPTIONS.get(food_type)
         if not food_coord:
             raise bot_config.InvalidConfiguration
 
@@ -169,7 +169,7 @@ def process_battle(mob_pos, is_boss):
 
         for item in need_replace:
             # Process replacing materials
-            process_replace(item)
+            process_replace_v2(item, food_type)
 
         # Press return
         emu_manager.mouse_click(35, 60)
@@ -250,6 +250,86 @@ def process_replace(index):
                            LAST_CHARACTER_CENTER[0] - CHARACTER_CARD_BOX[0], LAST_CHARACTER_CENTER[1], duration=700)
     time.sleep(1)
 
+def process_replace_v2(index, food_type="daruma"):
+    def drag_to_first(x1,y1,x2,y2, length):
+        emu_manager.mouse_drag(x1,
+                               y1 + 30,  # offset for title bar
+                               x2,
+                               y2 + 30,
+                               duration=length * 700)
+        time.sleep(length * 0.9)
+
+    if food_type != "daruma":
+        process_replace(index)
+    else:
+        # First, filter all locked food
+        while True:
+            locked = screen_processor.abs_search_multi("locked_food.png", FOOD_SEARCH_REGION, precision=0.9)
+            if locked:
+                locked.sort(key=lambda x: x[0], reverse=True)
+                # Find the right most food
+                last = locked[0]
+                # Drag in out
+                drag_to_first(last[0],
+                               last[1],
+                               85,
+                               last[1],
+                               len(locked))
+            else:
+                break
+
+        # Do the same with blue daruma, maxed or in-fight food, but one at a time
+        while True:
+            # Search for maxed food
+            maxed = screen_processor.abs_search_multi("max_lvl.png", FOOD_SEARCH_REGION, precision=0.9)
+            maxed.sort(key=lambda x: x[0], reverse=True)
+
+            if len(maxed) > 0 and maxed[-1][0] < FIRST_CHARACTER_LEVEL_REGION[2]:
+                last = maxed[0]
+                # Drag all of the maxed's out
+                drag_to_first(last[0],
+                              last[1],
+                              85,
+                              last[1],
+                              len(maxed))
+                continue
+
+            # Food that is currently in battle
+            in_fight = screen_processor.abs_search("in_fight.png", FIRST_CHARACTER_LEVEL_REGION)
+            if in_fight[0] != -1:
+                drag_to_first(in_fight[0],
+                              in_fight[1],
+                              in_fight[0] - CHARACTER_CARD_BOX[0],
+                              in_fight[1],
+                              1)
+                continue
+
+            # Don't farm blue daruma
+            # TODO make this configurable?
+            blue_drm = screen_processor.abs_search("blue_daruma.png", FIRST_CHARACTER_LEVEL_REGION)
+            if blue_drm[0] != -1:
+                drag_to_first(blue_drm[0],
+                              blue_drm[1],
+                              blue_drm[0] - CHARACTER_CARD_BOX[0],
+                              blue_drm[1],
+                              1)
+                continue
+
+            # We're good here, quit looping
+            break
+
+        # Finally, we found a food to replace!
+        time.sleep(0.5)
+        # First drag it out of the "stack" position to avoid a bug which will take a food in the thrash stack
+        # instead of the valid food
+        emu_manager.mouse_drag(FIRST_CHARACTER_CENTER[0], FIRST_CHARACTER_CENTER[1], FIRST_CHARACTER_CENTER[0]+200,
+                               FIRST_CHARACTER_CENTER[1], duration=1000)
+        time.sleep(1.5)
+        # Then drag it into team
+        emu_manager.mouse_drag(FIRST_CHARACTER_CENTER[0]+200, FIRST_CHARACTER_CENTER[1], FOOD_LOC_CHANGE[index][0],
+                               FOOD_LOC_CHANGE[index][1], duration=1000)
+        logger.info("Changed character #{}".format(index))
+        time.sleep(2)
 
 def buff_on(buffs=list()):
     logger.info("Turning on buffs...")
