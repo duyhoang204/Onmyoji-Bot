@@ -17,8 +17,8 @@ from realm import Realm, TICKET_AREAS, MAP_PANEL_DISPLAY, MAX_TICKETS
 FINISHED_MAIN_LOOP = [False]
 debug = 0
 
-realm_obj = Realm()
 bot_cfg = BotConfig()
+realm_obj = Realm(bot_cfg.get_property("Realm", "target_ticket"))
 
 logger = util.get_logger()
 
