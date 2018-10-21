@@ -103,6 +103,7 @@ def find_mobs_with_buff(buff="exp", fight_boss=False):
 
 def find_mobs_with_buff_v2(buff="exp", fight_boss=False):
     if fight_boss:
+        time.sleep(0.5)
         boss_pos = screen_processor.abs_search("boss.png", BOSS_SEARCH_BOX)
         if boss_pos[0] != -1:
             return boss_pos, True
