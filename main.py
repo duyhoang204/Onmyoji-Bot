@@ -108,14 +108,14 @@ def find_mobs_with_buff_v2(buff="exp", fight_boss=False):
             return boss_pos, True
 
     # Find all fight icons first
-    locs = sorted(screen_processor.abs_search_multi("fight.png", precision=0.98), key=lambda x: x[0])
+    locs = sorted(screen_processor.abs_search_multi("fight.png", EXP_SEARCH_REGION, precision=0.98), key=lambda x: x[0])
     for loc in locs:
         # for k in range(0, 2):
         for i in range(1, 7):
             # Decrease precision here?
             pos = screen_processor.abs_search("{}_icon_{}.png".format(buff, i),
                                               (loc[0]-170, loc[1], loc[0]+170, loc[1]+250),
-                                              precision=0.85)
+                                              precision=0.8)
             if pos[0] != -1:
                 return loc, False
 
@@ -340,7 +340,6 @@ def buff_on(buffs=list()):
     buff_btn = screen_processor.wait("buff_btn.png", BUFF_BTN_BOX, click=False)
     emu_manager.mouse_click(buff_btn[0], buff_btn[1] - 30, sleep=1)
     logger.info("Clicked buff")
-    time.sleep(2)
     for buff in buffs:
         buff_pos = screen_processor.abs_search("buff_exp_{}.png".format(buff.strip()), precision=0.7)
         # Retry
@@ -372,9 +371,8 @@ def buff_off(buffs=list()):
         return
 
     buff_btn = screen_processor.wait("buff_btn.png", BUFF_BTN_BOX, click=False, sleep=1)
-    emu_manager.mouse_click(buff_btn[0], buff_btn[1] - 30)
+    emu_manager.mouse_click(buff_btn[0], buff_btn[1] - 30, sleep=1)
     logger.info("Clicked buff")
-    time.sleep(2)
     # Probably have no more than 10 buffs
     for x in range(0, 10):
         pos = screen_processor.abs_search("buff_pause.png", precision=0.7)
@@ -542,7 +540,6 @@ def do_main_loop(run_time, start_time=time.time(), hwnd=None):
         #     break
 
         enter_map()
-        time.sleep(1)
         move_screen = 0
         while True:
             mob_pos, is_boss = find_mobs_with_buff_v2(fight_boss=BotConfig().should_fight_boss())
@@ -555,8 +552,8 @@ def do_main_loop(run_time, start_time=time.time(), hwnd=None):
             elif move_screen < 2:
                 # Move the screen to look for more mobs
                 # TODO remove hard code here
-                emu_manager.mouse_drag(WINDOW_WIDTH-100, 90, 100, 90, duration=1000)
-                time.sleep(1)
+                emu_manager.mouse_drag(WINDOW_WIDTH-100, 90, 100, 90, duration=700)
+                time.sleep(1.2)
                 move_screen += 1
             else:
                 # We probably couldn't find any mobs in this map, just quit then try again!
@@ -565,8 +562,6 @@ def do_main_loop(run_time, start_time=time.time(), hwnd=None):
                 emu_manager.mouse_click(EXIT_MAP_OK_BTN[0], EXIT_MAP_OK_BTN[1])
                 screen_processor.wait("buff_btn.png", BUFF_BTN_BOX, click=False)
                 break
-
-            time.sleep(1)
 
     time.sleep(3)
     logger.info("Ended main loop. Ran for {} seconds".format(time.time() - start_time))
@@ -693,7 +688,7 @@ def do_realm_battle(i, j, row, retry=False):
     if atk_btn[0] == -1:
         return False, False
     try:
-        screen_processor.wait("realm_back_btn.png", wait_count=15)
+        screen_processor.wait("realm_back_btn.png")
     except screen_processor.ImageNotFoundException:
         logger.info("Could not attack attack game {}! Maybe we ran out of tickets?..".format(i * 3 + j + 1))
         raise CannotAttackRealmException

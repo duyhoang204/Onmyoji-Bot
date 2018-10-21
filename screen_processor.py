@@ -104,7 +104,7 @@ def wait(img, area=None, click=False, sleep=0.7, wait_count=100, click_offset=(0
                 if pre_sleep:
                     time.sleep(pre_sleep)
                 offset_width, offset_height = click_offset
-                click_image(img, pos, double_click=False, offset_width=offset_width, offset_height=offset_height)
+                click_image(img, pos, offset_width=offset_width, offset_height=offset_height, sleep=0)
             return pos
         time.sleep(sleep)
 
