@@ -74,13 +74,6 @@ def enter_map():
         time.sleep(0.5)
     # mouse_click(EXPLORE_BUTTON[0], EXPLORE_BUTTON[1])
     screen_processor.wait("paper_dude.png", PAPER_DUDE_BOX, sleep=1)
-    # First move the mouse the right edge of the screen with some offset so it doesn't move outside of the window
-    # TODO hard code
-    emu_manager.mouse_drag(WINDOW_WIDTH - 20, 563, 200, 563, duration=2000)
-    time.sleep(2)
-    # pyautogui.moveTo(WINDOW_WIDTH-20, 563, 0.2)
-    # # Then drag to view map
-    # pyautogui.dragRel(-WINDOW_WIDTH+50, 0, 2)
 
 
 def find_mobs_with_buff(buff="exp", fight_boss=False):
@@ -107,6 +100,7 @@ def find_mobs_with_buff(buff="exp", fight_boss=False):
                     return fight_pos, False
     return (-1, -1), False
 
+
 def find_mobs_with_buff_v2(buff="exp", fight_boss=False):
     if fight_boss:
         boss_pos = screen_processor.abs_search("boss.png", BOSS_SEARCH_BOX)
@@ -114,13 +108,13 @@ def find_mobs_with_buff_v2(buff="exp", fight_boss=False):
             return boss_pos, True
 
     # Find all fight icons first
-    locs = screen_processor.abs_search_multi("fight.png", precision=0.98)
+    locs = sorted(screen_processor.abs_search_multi("fight.png", precision=0.98), key=lambda x: x[0])
     for loc in locs:
         # for k in range(0, 2):
         for i in range(1, 7):
             # Decrease precision here?
             pos = screen_processor.abs_search("{}_icon_{}.png".format(buff, i),
-                                              (loc[0]-150, loc[1], loc[0]+150, loc[1]+250),
+                                              (loc[0]-170, loc[1], loc[0]+170, loc[1]+250),
                                               precision=0.85)
             if pos[0] != -1:
                 return loc, False
@@ -219,10 +213,17 @@ def process_battle(mob_pos, is_boss):
 
     logger.info("Ending battle, waiting for map...")
     # Wait for map
-    while screen_processor.abs_search("back.png", BACK_BTN_BOX)[0] == -1:
-        time.sleep(0.5)
+    while screen_processor.abs_search("battle_reward.png")[0] == -1:
         # Click center of the screen with some offset
         emu_manager.mouse_click(663, 317)
+        time.sleep(0.5)
+
+    while screen_processor.abs_search("battle_reward.png")[0] != -1:
+        emu_manager.mouse_click(663, 317)
+        time.sleep(0.5)
+
+    screen_processor.wait("back.png", BACK_BTN_BOX)
+
     logger.info("Got back to map from battle!")
 
 
@@ -337,7 +338,7 @@ def buff_on(buffs=list()):
         return
     # Click on buff
     buff_btn = screen_processor.wait("buff_btn.png", BUFF_BTN_BOX, click=False)
-    emu_manager.mouse_click(buff_btn[0], buff_btn[1] - 5, sleep=1)
+    emu_manager.mouse_click(buff_btn[0], buff_btn[1] - 30, sleep=1)
     logger.info("Clicked buff")
     time.sleep(2)
     for buff in buffs:
@@ -371,7 +372,7 @@ def buff_off(buffs=list()):
         return
 
     buff_btn = screen_processor.wait("buff_btn.png", BUFF_BTN_BOX, click=False, sleep=1)
-    emu_manager.mouse_click(buff_btn[0], buff_btn[1] - 5)
+    emu_manager.mouse_click(buff_btn[0], buff_btn[1] - 30)
     logger.info("Clicked buff")
     time.sleep(2)
     # Probably have no more than 10 buffs
@@ -483,7 +484,7 @@ def do_main_loop(run_time, start_time=time.time(), hwnd=None):
             # Click again
             screen_processor.abs_search("mystic_shop.png", click=True)
             # Wait for camera to pan
-            time.sleep(5)
+            time.sleep(3)
 
             items = bot_cfg.get_property("General", "mystic_shop_items").split(",")
             for item in items:
@@ -542,21 +543,27 @@ def do_main_loop(run_time, start_time=time.time(), hwnd=None):
 
         enter_map()
         time.sleep(1)
+        move_screen = 0
         while True:
             mob_pos, is_boss = find_mobs_with_buff_v2(fight_boss=BotConfig().should_fight_boss())
             if mob_pos[0] != -1:
+                # Found mob!
                 process_battle(mob_pos, is_boss)
                 if is_boss:
                     # Finished this map
                     break
-            else:
+            elif move_screen < 2:
+                # Move the screen to look for more mobs
                 # TODO remove hard code here
+                emu_manager.mouse_drag(WINDOW_WIDTH-100, 90, 100, 90, duration=1000)
+                time.sleep(1)
+                move_screen += 1
+            else:
+                # We probably couldn't find any mobs in this map, just quit then try again!
                 util.click_image("back.png", (16, 71))
                 # Confirm exit map
                 emu_manager.mouse_click(EXIT_MAP_OK_BTN[0], EXIT_MAP_OK_BTN[1])
                 screen_processor.wait("buff_btn.png", BUFF_BTN_BOX, click=False)
-                # time.sleep(2)
-                # Click on map 20 in case of boss found in map
                 break
 
             time.sleep(1)
@@ -619,24 +626,32 @@ def enter_realm(start_time, run_time):
     emu_manager.mouse_click(307, 683)
     screen_processor.wait("realm_reward_icon.png")
 
-    current_tickets = MAX_TICKETS
-    # current_tickets = 10 #TODO test
+    try:
+        current_tickets = int(screen_processor.get_text(370, 590, 515, 670).split("/")[0])
+    except:
+        current_tickets = MAX_TICKETS
 
     while True:
         has_lost = False
         for i, col in enumerate(realm_obj.regions):
             for j, row in enumerate(realm_obj.regions[i]):
-                win, did_battle = do_realm_battle(i, j, row)
-                # Check if won
-                if not win and bot_cfg.get_property("Realm", "do_retry"):
-                    win, did_battle = do_realm_battle(i, j, row, retry=True)
+                try:
+                    win, did_battle = do_realm_battle(i, j, row)
+                    # Check if won
+                    if not win and bot_cfg.get_property("Realm", "do_retry"):
+                        win, did_battle = do_realm_battle(i, j, row, retry=True)
 
-                # Deduct ticket count
-                if win and did_battle:
-                    current_tickets = current_tickets - 1
-                    logger.info("Current tickets: {}".format(current_tickets))
+                    # Deduct ticket count
+                    if win and did_battle:
+                        current_tickets = current_tickets - 1
+                        logger.info("Current tickets: {}".format(current_tickets))
 
-                has_lost |= not win
+                    has_lost |= not win
+                except CannotAttackRealmException:
+                    # Probably ran out of tickets
+                    current_tickets = 0
+                    # Close attack popup
+                    emu_manager.mouse_click(1180, 95, 1)
 
                 if current_tickets == 0 or ((time.time() - start_time) > run_time):
                     # Close realm screen
@@ -651,6 +666,10 @@ def enter_realm(start_time, run_time):
             emu_manager.mouse_click(746, 461, 1)
 
         time.sleep(2)
+
+
+class CannotAttackRealmException(BaseException):
+    pass
 
 
 def do_realm_battle(i, j, row, retry=False):
@@ -673,8 +692,11 @@ def do_realm_battle(i, j, row, retry=False):
     # Fail safe this
     if atk_btn[0] == -1:
         return False, False
-
-    screen_processor.wait("realm_back_btn.png")
+    try:
+        screen_processor.wait("realm_back_btn.png", wait_count=15)
+    except screen_processor.ImageNotFoundException:
+        logger.info("Could not attack attack game {}! Maybe we ran out of tickets?..".format(i * 3 + j + 1))
+        raise CannotAttackRealmException
 
     # Select team
     emu_manager.mouse_click(84, 681, 1)
@@ -723,7 +745,7 @@ if __name__ == "__main__":
     with ThreadPoolExecutor(max_workers=4) as executor:
         futures = {executor.submit(main_task, run_time, start_time=start_time, hwnd=hwnd),
                    executor.submit(kill_popups, run_time, start_time=start_time),
-                   executor.submit(close_teamviewer_modal, run_time, start_time=start_time),
+                   # executor.submit(close_teamviewer_modal, run_time, start_time=start_time),
                    executor.submit(check_main_task_ended, run_time, start_time=start_time)}
 
         for f in as_completed(futures):

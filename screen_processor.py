@@ -25,7 +25,12 @@ import emu_manager
 
 hwnd = emu_manager.get_instance(int(BotConfig().get_property("Emulator", "use_device")))
 
+
 def find_text(text, x1, y1, x2, y2):
+    return text in get_text(x1, y1, x2, y2)
+
+
+def get_text(x1, y1, x2, y2):
     import emu_manager
     hwnd = emu_manager.get_instance(int(BotConfig().get_property("Emulator", "use_device")))
     image = region_grabber_v2((x1, y1, x2, y2), hwnd)
@@ -55,8 +60,8 @@ def find_text(text, x1, y1, x2, y2):
     Image.open(filename)
     result = pytesseract.image_to_string(Image.open(filename))
     os.remove(filename)
-    logger.info("Text on screen: \"{}\", text to find: \"{}\", return: {}".format(result, text, text in result))
-    return text in result
+    logger.info("Text on screen: \"{}\"".format(result))
+    return result
 
 
 def abs_search(file_name, pos_box=None, precision=0.8, get_absolute_pos=True, click=False):

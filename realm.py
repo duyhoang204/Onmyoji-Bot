@@ -15,6 +15,7 @@ TICKET_AREAS = [
     (359, 616, 492, 673)
 ]
 
+
 class Realm:
     def __init__(self, target_ticket=30):
         self.target_ticket = int(target_ticket)
@@ -38,6 +39,7 @@ class Realm:
         if 0 > scr_idx > len(TICKET_AREAS):
             raise ValueError
 
-        return screen_processor.find_text("{}.0/".format(self.target_ticket), *(TICKET_AREAS[scr_idx])) \
+        return self.target_ticket == 0 \
+               or screen_processor.find_text("{}.0/".format(self.target_ticket), *(TICKET_AREAS[scr_idx])) \
                or screen_processor.find_text("{}/".format(self.target_ticket), *(TICKET_AREAS[scr_idx])) \
                or screen_processor.find_text("so/", *(TICKET_AREAS[scr_idx]))
