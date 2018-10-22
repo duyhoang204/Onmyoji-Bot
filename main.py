@@ -131,8 +131,8 @@ def process_battle(mob_pos, is_boss):
 
     # Wait for the back button to appear
     try:
-        screen_processor.wait("team_battle.png", sleep=0.5, click=False, wait_count=15)
-        screen_processor.wait("realm_back_btn.png", sleep=1, click=False, wait_count=15)
+        screen_processor.wait("team_battle.png", sleep=0.3, click=False, wait_count=50)
+        screen_processor.wait("realm_back_btn.png", sleep=0.3, click=False, wait_count=50)
     except screen_processor.ImageNotFoundException:
         # We possibly missed the fight button, just return
         return
@@ -220,7 +220,7 @@ def process_battle(mob_pos, is_boss):
 
     while screen_processor.abs_search("battle_reward.png")[0] != -1:
         emu_manager.mouse_click(663, 317)
-        time.sleep(1)
+        time.sleep(0.5)
 
     screen_processor.wait("back.png", BACK_BTN_BOX)
 
