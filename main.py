@@ -338,7 +338,7 @@ def buff_on(buffs=list()):
         return
     # Click on buff
     buff_btn = screen_processor.wait("buff_btn.png", BUFF_BTN_BOX, click=False)
-    emu_manager.mouse_click(buff_btn[0], buff_btn[1] - 30, sleep=1)
+    emu_manager.mouse_click(buff_btn[0], buff_btn[1] - 30, sleep=1.5)
     logger.info("Clicked buff")
     for buff in buffs:
         buff_pos = screen_processor.abs_search("buff_exp_{}.png".format(buff.strip()), precision=0.7)
@@ -371,7 +371,7 @@ def buff_off(buffs=list()):
         return
 
     buff_btn = screen_processor.wait("buff_btn.png", BUFF_BTN_BOX, click=False, sleep=1)
-    emu_manager.mouse_click(buff_btn[0], buff_btn[1] - 30, sleep=1)
+    emu_manager.mouse_click(buff_btn[0], buff_btn[1] - 30, sleep=1.5)
     logger.info("Clicked buff")
     # Probably have no more than 10 buffs
     for x in range(0, 10):
