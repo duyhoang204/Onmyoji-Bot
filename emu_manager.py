@@ -5,7 +5,6 @@ import win32gui
 from bot_config import BotConfig
 from common import EMULATOR_CONFIGS
 
-NOX_ADB_PATH = BotConfig().get_emulator_path()
 EMU_ID = BotConfig().get_property("Emulator", "use_device")
 
 
@@ -19,7 +18,8 @@ def mouse_drag(x1, y1, x2, y2, duration=1500):
 
 
 def get_adb_prefix():
-    return "\"{}\\bin\\adb\" -s {}".format(NOX_ADB_PATH, EMULATOR_CONFIGS.get(EMU_ID).get("id"))
+    return "\"adb\\adb\" -s {}".format(EMULATOR_CONFIGS.get(EMU_ID).get("id"))
+    # return "\"{}\\bin\\adb\" -s {}".format(NOX_ADB_PATH, EMULATOR_CONFIGS.get(EMU_ID).get("id"))
 
 def get_instance(index, force_start=True):
     win_title = "NoxPlayer" if index == 0 else "NoxPlayer{}".format(index)
