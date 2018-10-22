@@ -103,7 +103,6 @@ def find_mobs_with_buff(buff="exp", fight_boss=False):
 
 def find_mobs_with_buff_v2(buff="exp", fight_boss=False):
     if fight_boss:
-        time.sleep(0.5)
         boss_pos = screen_processor.abs_search("boss.png", BOSS_SEARCH_BOX)
         if boss_pos[0] != -1:
             return boss_pos, True
@@ -221,7 +220,7 @@ def process_battle(mob_pos, is_boss):
 
     while screen_processor.abs_search("battle_reward.png")[0] != -1:
         emu_manager.mouse_click(663, 317)
-        time.sleep(0.5)
+        time.sleep(1)
 
     screen_processor.wait("back.png", BACK_BTN_BOX)
 
@@ -542,11 +541,19 @@ def do_main_loop(run_time, start_time=time.time(), hwnd=None):
 
         enter_map()
         move_screen = 0
+        fight_boss = BotConfig().should_fight_boss()
+        just_battled = False
+        battle_count = 0
         while True:
-            mob_pos, is_boss = find_mobs_with_buff_v2(fight_boss=BotConfig().should_fight_boss())
+            if fight_boss and battle_count >=3 and just_battled:
+                # Wait on screen a little bit in case boss appears
+                time.sleep(1 + move_screen * 0.1)
+            mob_pos, is_boss = find_mobs_with_buff_v2(fight_boss=(fight_boss and battle_count >=3))
             if mob_pos[0] != -1:
                 # Found mob!
                 process_battle(mob_pos, is_boss)
+                battle_count += 1
+                just_battled = True
                 if is_boss:
                     # Finished this map
                     break
@@ -556,6 +563,7 @@ def do_main_loop(run_time, start_time=time.time(), hwnd=None):
                 emu_manager.mouse_drag(WINDOW_WIDTH-100, 90, 100, 90, duration=700)
                 time.sleep(1.2)
                 move_screen += 1
+                just_battled = False
             else:
                 # We probably couldn't find any mobs in this map, just quit then try again!
                 util.click_image("back.png", (16, 71))
@@ -625,21 +633,34 @@ def enter_realm(start_time, run_time):
     try:
         current_tickets = int(screen_processor.get_text(370, 590, 515, 670).split("/")[0])
     except:
-        current_tickets = MAX_TICKETS
+        current_tickets = realm_obj.target_ticket
 
+    # Find current win streak
+    # win_streak = len(screen_processor.abs_search_multi("realm_win.png", precision=0.967)) + \
+    #              len(screen_processor.abs_search_multi("realm_win_1.png", precision=0.96))
+
+    win_streak = 0
+    for i, col in enumerate(realm_obj.regions):
+        for j, row in enumerate(realm_obj.regions[i]):
+            if screen_processor.abs_search("realm_win.png", row)[0] != -1 or \
+            screen_processor.abs_search("realm_win_1.png", row)[0] != -1:
+                win_streak += 1
+
+    logger.info("Win streak: {}".format(win_streak))
     while True:
         has_lost = False
         for i, col in enumerate(realm_obj.regions):
             for j, row in enumerate(realm_obj.regions[i]):
                 try:
-                    win, did_battle = do_realm_battle(i, j, row)
+                    win, did_battle = do_realm_battle(i, j, row, win_streak)
                     # Check if won
                     if not win and bot_cfg.get_property("Realm", "do_retry"):
-                        win, did_battle = do_realm_battle(i, j, row, retry=True)
+                        win, did_battle = do_realm_battle(i, j, row, win_streak, retry=True)
 
                     # Deduct ticket count
                     if win and did_battle:
                         current_tickets = current_tickets - 1
+                        win_streak += 1
                         logger.info("Current tickets: {}".format(current_tickets))
 
                     has_lost |= not win
@@ -668,7 +689,7 @@ class CannotAttackRealmException(BaseException):
     pass
 
 
-def do_realm_battle(i, j, row, retry=False):
+def do_realm_battle(i, j, row, win_streak, retry=False):
     if not retry:
         win = screen_processor.abs_search("realm_win.png", row)[0] != -1 or \
               screen_processor.abs_search("realm_win_1.png", row)[0] != -1
@@ -704,17 +725,22 @@ def do_realm_battle(i, j, row, retry=False):
     while screen_processor.abs_search("auto_icon.png", (0, WINDOW_HEIGHT - 300, 300, WINDOW_HEIGHT))[0] == -1:
         emu_manager.mouse_click(*BATTLE_START_BTN, sleep=3)
 
+    win = False
     while screen_processor.abs_search("realm_reward_icon.png")[0] == -1:
+        if screen_processor.abs_search("battle_reward.png")[0] != -1:
+            win = True
         # Click a random place
         emu_manager.mouse_click(153, 573, sleep=1)
 
-    time.sleep(2)
-    # Click outside a few times in case we have milestone reward
-    emu_manager.mouse_click(153, 573, sleep=1)
-    emu_manager.mouse_click(153, 573, sleep=1)
+    current_streak = win_streak + 1 if win else 1
+    if current_streak % 3 == 0:
+        time.sleep(2)
+        # Click outside a few times in case we have milestone reward
+        emu_manager.mouse_click(153, 573, sleep=1)
+        emu_manager.mouse_click(153, 573, sleep=1)
 
     # Check win and return
-    return screen_processor.abs_search("realm_lost.png", row)[0] == -1, True
+    return win, True
 
 
 def go_to_explore_screen():
