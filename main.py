@@ -174,11 +174,14 @@ def process_battle(mob_pos, is_boss):
         emu_manager.mouse_click(*BATTLE_START_BTN)
 
     # Start spamming target for at least 5 seconds
-    start = time.time()
-    spam_time = 10 if is_boss else 5
-    while time.time() - start < spam_time:
-        # Target the left most monster in the front row. This is for single target shiki like Irabaki
-        emu_manager.mouse_click(623, 210)
+    # start = time.time()
+    # spam_time = 10 if is_boss else 5
+    # while time.time() - start < spam_time:
+    #     # Target the left most monster in the front row. This is for single target shiki like Irabaki
+    #     emu_manager.mouse_click(623, 210)
+
+    # Target the left most monster in the front row. This is for single target shiki like Irabaki
+    emu_manager.mouse_click(623, 230)
 
     while screen_processor.abs_search("auto_icon.png", (0, WINDOW_HEIGHT - 300, 300, WINDOW_HEIGHT))[0] != -1:
         time.sleep(1)
@@ -213,13 +216,13 @@ def process_battle(mob_pos, is_boss):
 
     logger.info("Ending battle, waiting for map...")
     # Wait for map
-    while screen_processor.abs_search("battle_reward.png")[0] == -1:
+    while screen_processor.abs_search("battle_reward.png", BATTLE_REWARD_BOX)[0] == -1:
         # Click center of the screen with some offset
-        emu_manager.mouse_click(663, 317)
+        emu_manager.mouse_click(663, 530)
         time.sleep(0.5)
 
-    while screen_processor.abs_search("battle_reward.png")[0] != -1:
-        emu_manager.mouse_click(663, 317)
+    while screen_processor.abs_search("battle_reward.png", BATTLE_REWARD_BOX)[0] != -1:
+        emu_manager.mouse_click(663, 530)
         time.sleep(0.5)
 
     screen_processor.wait("back.png", BACK_BTN_BOX)
@@ -520,7 +523,8 @@ def do_main_loop(run_time, start_time=time.time(), hwnd=None):
             continue
 
         # Check for realm tickets
-        if realm_obj.is_max_tickets(MAP_PANEL_DISPLAY):
+        realm_only = int(bot_cfg.get_property("Realm", "realm_only"))
+        if realm_obj.is_max_tickets(MAP_PANEL_DISPLAY) or realm_only:
             if int(bot_cfg.get_property("Realm", "stop_map_farming_when_full_ticket")):
                 # Quit farming
                 logger.info("Realm tickets are full! Quitting farming..")
@@ -529,7 +533,7 @@ def do_main_loop(run_time, start_time=time.time(), hwnd=None):
                 time.sleep(1)
                 emu_manager.mouse_click(1050, 174, 1)
                 enter_realm(start_time, run_time)
-                if time.time() - start_time > run_time:
+                if time.time() - start_time > run_time or realm_only:
                     # Finish
                     break
 
@@ -630,11 +634,16 @@ def enter_realm(start_time, run_time):
     emu_manager.mouse_click(307, 683)
     screen_processor.wait("realm_reward_icon.png")
 
-    try:
-        current_tickets = int(screen_processor.get_text(370, 590, 515, 670).split("/")[0])
-    except:
-        current_tickets = realm_obj.target_ticket
+    # try:
+    #     current_tickets = int(screen_processor.get_text(370, 590, 515, 670).split("/")[0])
+    # except:
+    #     current_tickets = realm_obj.target_ticket
+    #
+    # if current_tickets == 0:
+    #     # Probably setup to enter realm immediately, so a trick is set current ticket to a negative number
+    #     # so the bot will continue to attack until we run out of tickets
 
+    #
     # Find current win streak
     # win_streak = len(screen_processor.abs_search_multi("realm_win.png", precision=0.967)) + \
     #              len(screen_processor.abs_search_multi("realm_win_1.png", precision=0.96))
@@ -649,6 +658,7 @@ def enter_realm(start_time, run_time):
     logger.info("Win streak: {}".format(win_streak))
     while True:
         has_lost = False
+        out_of_tickets = False
         for i, col in enumerate(realm_obj.regions):
             for j, row in enumerate(realm_obj.regions[i]):
                 try:
@@ -659,18 +669,19 @@ def enter_realm(start_time, run_time):
 
                     # Deduct ticket count
                     if win and did_battle:
-                        current_tickets = current_tickets - 1
+                        # current_tickets = current_tickets - 1
                         win_streak += 1
-                        logger.info("Current tickets: {}".format(current_tickets))
+                        # logger.info("Current tickets: {}".format(current_tickets))
 
                     has_lost |= not win
                 except CannotAttackRealmException:
                     # Probably ran out of tickets
-                    current_tickets = 0
+                    # current_tickets = 0
+                    out_of_tickets = True
                     # Close attack popup
                     emu_manager.mouse_click(1180, 95, 1)
 
-                if current_tickets == 0 or ((time.time() - start_time) > run_time):
+                if out_of_tickets or ((time.time() - start_time) > run_time):
                     # Close realm screen
                     emu_manager.mouse_click(1180, 95, 1)
                     # Turn the buffs back on to continue farming
@@ -709,6 +720,15 @@ def do_realm_battle(i, j, row, win_streak, retry=False):
     # Fail safe this
     if atk_btn[0] == -1:
         return False, False
+
+    # Another fail safe
+    time.sleep(3)
+    atk_btn = screen_processor.abs_search("realm_atk_btn.png")
+    # If the atk button is still there, we probably ran out of tickets
+    if atk_btn[0] != -1:
+        logger.info("Could not get to battle screen for game {}! Maybe we ran out of tickets?..".format(i * 3 + j + 1))
+        raise CannotAttackRealmException
+
     try:
         screen_processor.wait("realm_back_btn.png")
     except screen_processor.ImageNotFoundException:
