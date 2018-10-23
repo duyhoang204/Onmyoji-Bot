@@ -181,7 +181,7 @@ def process_battle(mob_pos, is_boss):
     #     emu_manager.mouse_click(623, 210)
 
     # Target the left most monster in the front row. This is for single target shiki like Irabaki
-    emu_manager.mouse_click(623, 230)
+    emu_manager.mouse_click(623, 223)
 
     while screen_processor.abs_search("auto_icon.png", (0, WINDOW_HEIGHT - 300, 300, WINDOW_HEIGHT))[0] != -1:
         time.sleep(1)
@@ -254,6 +254,7 @@ def process_replace(index):
                            LAST_CHARACTER_CENTER[0] - CHARACTER_CARD_BOX[0], LAST_CHARACTER_CENTER[1], duration=700)
     time.sleep(1)
 
+
 def process_replace_v2(index, food_type="daruma"):
     def drag_to_first(x1,y1,x2,y2, length):
         emu_manager.mouse_drag(x1,
@@ -275,10 +276,10 @@ def process_replace_v2(index, food_type="daruma"):
                 last = locked[0]
                 # Drag in out
                 drag_to_first(last[0],
-                               last[1],
-                               85,
-                               last[1],
-                               len(locked))
+                              last[1],
+                              85,
+                              last[1],
+                              len(locked))
             else:
                 break
 
