@@ -129,12 +129,16 @@ def process_battle(mob_pos, is_boss):
     # Click on Fight
     util.click_image("fight.png", mob_pos)
 
+    time.sleep(1)
+
+    if screen_processor.abs_search("mochi.png", (650, 34, 740, 86))[0] != -1:
+        # We possibly missed the fight button because mochi icon is still there, just return
+        return
+
     # Wait for the back button to appear
     try:
-        screen_processor.wait("team_battle.png", sleep=0.3, click=False, wait_count=50)
         screen_processor.wait("realm_back_btn.png", sleep=0.3, click=False, wait_count=50)
     except screen_processor.ImageNotFoundException:
-        # We possibly missed the fight button, just return
         return
 
     # Check for max level materials
@@ -216,16 +220,19 @@ def process_battle(mob_pos, is_boss):
 
     logger.info("Ending battle, waiting for map...")
     # Wait for map
-    while screen_processor.abs_search("battle_reward.png", BATTLE_REWARD_BOX)[0] == -1:
-        # Click center of the screen with some offset
+    # while screen_processor.abs_search("battle_reward.png", BATTLE_REWARD_BOX)[0] == -1:
+    #     # Click center of the screen with some offset
+    #     emu_manager.mouse_click(663, 530)
+    #     time.sleep(0.5)
+    #
+    # while screen_processor.abs_search("battle_reward.png", BATTLE_REWARD_BOX)[0] != -1:
+    #     emu_manager.mouse_click(663, 530)
+    #     time.sleep(0.5)
+
+    while screen_processor.abs_search("back.png", BACK_BTN_BOX)[0] == -1:
         emu_manager.mouse_click(663, 530)
         time.sleep(0.5)
-
-    while screen_processor.abs_search("battle_reward.png", BATTLE_REWARD_BOX)[0] != -1:
-        emu_manager.mouse_click(663, 530)
-        time.sleep(0.5)
-
-    screen_processor.wait("back.png", BACK_BTN_BOX)
+    # screen_processor.wait("back.png", BACK_BTN_BOX)
 
     logger.info("Got back to map from battle!")
 
