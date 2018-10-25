@@ -730,7 +730,7 @@ def do_realm_battle(i, j, row, win_streak, retry=False):
         return False, False
 
     # Another fail safe
-    time.sleep(3)
+    time.sleep(5)
     atk_btn = screen_processor.abs_search("realm_atk_btn.png")
     # If the atk button is still there, we probably ran out of tickets
     if atk_btn[0] != -1:
@@ -800,6 +800,3 @@ if __name__ == "__main__":
 
         for f in as_completed(futures):
             rs = f.result()
-
-    # emu_manager.mouse_click(1050, 174, 1)
-    # enter_realm(time.time(), 3600)

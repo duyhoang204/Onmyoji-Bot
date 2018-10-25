@@ -7,13 +7,6 @@ import logging
 import emu_manager
 import screen_processor
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s %(levelname)s: %(message)s'
-                    # filename='logs/main.log',
-                    # filemode='w+')
-                    )
-
-logger = logging.getLogger('')
 
 
 def click_image(image, pos, offset_width=0, offset_height=0, sleep=0.5):
@@ -35,5 +28,14 @@ def find_and_click(img_name, region, double_click=True):
 def r(num, rand):
     return num + rand*random.random()
 
-def get_logger():
+def get_logger(name='main'):
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s %(levelname)s: %(message)s',
+                        handlers=[
+                            logging.FileHandler("logs/{}.log".format(name)),
+                            logging.StreamHandler()
+                        ]
+                        )
+    # )
+    logger = logging.getLogger(name)
     return logger

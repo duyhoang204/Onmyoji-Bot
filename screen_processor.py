@@ -35,7 +35,6 @@ def get_text(x1, y1, x2, y2):
     hwnd = emu_manager.get_instance(int(BotConfig().get_property("Emulator", "use_device")))
     image = region_grabber_v2((x1, y1, x2, y2), hwnd)
     # image.save('testarea.png')  # useful for debugging purposes, this will save the captured region as "testarea.png"
-
     image = np.array(image)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
