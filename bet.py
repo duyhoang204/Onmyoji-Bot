@@ -38,7 +38,6 @@ class Better:
 
         def pick_side(tries=0):
             # Try picking a side with more people first
-            print(tries)
             try:
                 red = int(screen_processor.get_text(290, 604, 408, 654))
                 logger.info("Red: {}".format(red))
@@ -75,7 +74,7 @@ class Better:
             # Go with 200k
             emu_manager.mouse_click(*BET_200K, sleep=1)
 
-        emu_manager.mouse_click(*BET_CLICK_OUT)
+        emu_manager.mouse_click(*BET_CLICK_OUT, sleep=1)
         # Confirm
         emu_manager.mouse_click(*BET_CONFIRM)
         logger.info("Bet done!")
