@@ -56,9 +56,6 @@ def restart_game():
         logger.info("Game not running, starting app...".format(APP_PKG_NAME))
         emu_manager.start_app(APP_PKG_NAME)
         logger.info("App started successfully.")
-        logger.info("Navigating to explore screen...")
-        go_to_explore_screen()
-        logger.info("Done setting up.")
 
 
 def enter_map():
@@ -406,6 +403,7 @@ def main_task(run_time, start_time=time.time(), hwnd=None):
         traceback.print_exception(e_type, val, tb, limit=10, file=sys.stdout)
         if not debug:
             restart_game()
+            go_to_explore_screen()
             do_main_loop(run_time, start_time)
 
 
@@ -770,8 +768,8 @@ def do_realm_battle(i, j, row, win_streak, retry=False):
     # Check win and return
     return win, True
 
-
-def go_to_explore_screen():
+def go_to_main_screen():
+    logger.info("Getting to main screen...")
     # Go to explore screen from login screen
     while screen_processor.abs_search("main_scr_buff.png")[0] == -1:
         if screen_processor.abs_search("login_announcement.png", precision=0.9)[0] != -1:
@@ -779,9 +777,24 @@ def go_to_explore_screen():
             time.sleep(1)
         time.sleep(1.5)
         emu_manager.mouse_click(*LOGIN_BTN)
-
     time.sleep(15)
+    logger.info("Got to main screen...")
+
+def go_to_explore_screen():
+    go_to_main_screen()
+    logger.info("Getting to explore screen...")
     emu_manager.mouse_click(*EXPLORE_BTN)
+    logger.info("Got to explore screen!")
+
+def go_to_town():
+    go_to_main_screen()
+    logger.info("Getting to town screen...")
+    emu_manager.mouse_click(*TOWN_BTN)
+    screen_processor.wait("town_sign.png")
+    logger.info("Got to town screen!")
+
+def is_in_town():
+    return screen_processor.abs_search("town_sign.png")[0] != -1
 
 
 if __name__ == "__main__":
