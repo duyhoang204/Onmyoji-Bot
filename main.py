@@ -1,3 +1,4 @@
+import random
 import subprocess
 import sys
 import traceback
@@ -741,12 +742,7 @@ def do_realm_battle(i, j, row, win_streak, retry=False):
         logger.info("Could not attack attack game {}! Maybe we ran out of tickets?..".format(i * 3 + j + 1))
         raise CannotAttackRealmException
 
-    # Select team
-    emu_manager.mouse_click(84, 681, 1)
-    team_pos = REALM_TEAMS[0] if not retry else REALM_TEAMS[1]
-    emu_manager.mouse_click(*team_pos)
-    screen_processor.wait("realm_team_set.png", click=True)
-    # emu_manager.mouse_click(*REALM_SELECT_TEAM_BTN)
+    select_team()
 
     while screen_processor.abs_search("auto_icon.png", (0, WINDOW_HEIGHT - 300, 300, WINDOW_HEIGHT))[0] == -1:
         emu_manager.mouse_click(*BATTLE_START_BTN, sleep=3)
@@ -793,8 +789,17 @@ def go_to_town():
     screen_processor.wait("town_sign.png")
     logger.info("Got to town screen!")
 
+
 def is_in_town():
     return screen_processor.abs_search("town_sign.png")[0] != -1
+
+
+def select_team():
+    # Select team
+    emu_manager.mouse_click(84, 681, 1)
+    team_pos = REALM_TEAMS[0]
+    emu_manager.mouse_click(*team_pos)
+    screen_processor.wait("realm_team_set.png", click=True)
 
 
 if __name__ == "__main__":

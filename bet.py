@@ -4,6 +4,7 @@ from main import *
 
 logger = util.get_logger()
 
+
 class Better:
     def __init__(self):
         pass
@@ -15,7 +16,8 @@ class Better:
             go_to_town()
             time.sleep(5)
         # Click on bet dude
-        emu_manager.mouse_click(*BET_DUDE, sleep=3)
+        emu_manager.mouse_click(*BET_DUDE)
+        screen_processor.wait("bet_sign.png")
 
         if screen_processor.abs_search("bet_complete.png")[0] != -1:
             logger.info("Already bet this round!")
@@ -25,7 +27,7 @@ class Better:
         # Check previous bet
         if screen_processor.abs_search("bet_win.png")[0] != -1:
             logger.info("We won! Yay!")
-            #Claim reward
+            # Claim reward
             emu_manager.mouse_click(*BET_CLAIM_REWARD)
             time.sleep(10)
             # Click again to stop animation
@@ -34,6 +36,7 @@ class Better:
 
         screen_processor.abs_search("next_bet.png", click=True)
         logger.info("Proceeding to next bet...")
+        time.sleep(2)
 
         def pick_side(tries=0):
             # Try picking a side with more people first
@@ -49,9 +52,10 @@ class Better:
                 elif rate <= 0.3:
                     return 1
                 else:
-                    return random.randint(0,1)
+                    logger.info("Randomizing choices...")
+                    return 0 if random.randint(1, 100) <= 50 else 1
             except:
-                if tries < 5:
+                if tries < 10:
                     # Exit then enter again
                     emu_manager.mouse_click(1148, 169, sleep=1)
                     emu_manager.mouse_click(713, 421, sleep=5)
@@ -65,7 +69,7 @@ class Better:
         except:
             logger.info("Could not decide which side is better, trying picking randomly...")
             # Randomly pick side
-            side = random.randint(0,1)
+            side = 0 if random.randint(1, 100) <= 50 else 1
 
         logger.info("Picked {}!".format("blue" if side else "red"))
 
@@ -88,13 +92,14 @@ class Better:
         emu_manager.mouse_click(1147, 169)
         FINISHED_MAIN_LOOP[0] = True
 
+
 if __name__ == "__main__":
     from concurrent.futures import ThreadPoolExecutor, as_completed
     start_time = time.time()
-    run_time = 60*3
+    run_time = bot_cfg.get_run_time_in_seconds()
     hwnd = set_up()
 
-    logger.info("Starting bot...")
+    logger.info("Starting bet bot...")
     # Better().start()
     with ThreadPoolExecutor(max_workers=4) as executor:
         futures = {executor.submit(Better().start),

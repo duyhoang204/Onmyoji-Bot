@@ -1,3 +1,3 @@
 E:
 cd ads_bot\Onmyoji-Bot\
-python bet.py
+python neither_gate.py
