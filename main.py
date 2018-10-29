@@ -742,7 +742,7 @@ def do_realm_battle(i, j, row, win_streak, retry=False):
         logger.info("Could not attack attack game {}! Maybe we ran out of tickets?..".format(i * 3 + j + 1))
         raise CannotAttackRealmException
 
-    select_team()
+    select_team(1 if retry else 0)
 
     while screen_processor.abs_search("auto_icon.png", (0, WINDOW_HEIGHT - 300, 300, WINDOW_HEIGHT))[0] == -1:
         emu_manager.mouse_click(*BATTLE_START_BTN, sleep=3)
@@ -794,10 +794,10 @@ def is_in_town():
     return screen_processor.abs_search("town_sign.png")[0] != -1
 
 
-def select_team():
+def select_team(index=0):
     # Select team
     emu_manager.mouse_click(84, 681, 1)
-    team_pos = REALM_TEAMS[0]
+    team_pos = REALM_TEAMS[index]
     emu_manager.mouse_click(*team_pos)
     screen_processor.wait("realm_team_set.png", click=True)
 
