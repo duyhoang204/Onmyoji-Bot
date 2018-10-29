@@ -30,6 +30,11 @@ class DemonEncounter:
             time.sleep(5)
 
         logger.info("Boss fight started!")
+        while screen_processor.abs_search("shiki_icon.png")[0] == -1:
+            emu_manager.mouse_click(*DE_DECOY_TARGET)
+            time.sleep(1)
+
+        logger.info("Boss fight ended!")
 
     def join_boss_fight(self):
         # Open chat
@@ -38,12 +43,12 @@ class DemonEncounter:
             emu_manager.mouse_click(*GUILD_CHAT_MAIN)
 
         def find_boss(index):
-            boss_locs = screen_processor.abs_search_multi("boss_txt_2.png", precision=0.94)
+            boss_locs = screen_processor.abs_search_multi("boss_txt.png", precision=0.94)
             # Sort by y axis
             boss_locs.sort(key=lambda x: x[1])
             logger.info(boss_locs)
             if len(boss_locs) == 0:
-                time.sleep(10)
+                time.sleep(1)
                 return find_boss(0)
 
             # for loc in boss_locs:
@@ -51,7 +56,7 @@ class DemonEncounter:
 
             loc = boss_locs[index]
             emu_manager.mouse_click(loc[0], loc[1]-30, sleep=3)
-            boss_panel = screen_processor.abs_search("de_boss_panel_3.png")
+            boss_panel = screen_processor.abs_search("de_boss_panel.png")
             timer = screen_processor.abs_search("de_boss_timer.png")
             logger.info("{} {}".format(boss_panel, timer))
             if boss_panel[0] != -1 and timer[0] != -1:
