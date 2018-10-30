@@ -1,3 +1,4 @@
+import shiki_utils
 from main import *
 
 logger = util.get_logger()
@@ -11,8 +12,10 @@ class DemonEncounter:
         if not is_in_town():
             logger.info("Restarting game...")
             restart_game()
-            go_to_town()
-            time.sleep(5)
+            # go_to_town()
+            # time.sleep(5)
+
+        shiki_utils.soul_change("shuten.png", "nura_soulset.png")
 
         count = 0
         while not self.join_boss_fight():

@@ -1,4 +1,5 @@
 from main import *
+import shiki_utils
 
 logger = util.get_logger()
 
@@ -8,28 +9,9 @@ class Orochi:
 
     def start(self):
         logger.info("Restarting game...")
-        # restart_game()
+        restart_game()
 
-        # Souls check!
-        screen_processor.abs_search("shiki_icon.png", click=True)
-        screen_processor.wait("tho.png")
-        screen_processor.abs_search("irabaki.png", click=True)
-        # Click on soul set
-        emu_manager.mouse_click(553, 187)
-
-        screen_processor.wait("soul_change.png", click=True)
-        screen_processor.wait("soul_save.png")
-        if screen_processor.abs_search("ira_soulset.png")[0] == -1:
-            #TODO un-hardcode this
-            emu_manager.mouse_click(568, 205, sleep=1)
-            emu_manager.mouse_click(745, 458)
-            screen_processor.wait("ira_soulset.png")
-
-        # Back
-        emu_manager.mouse_click(49, 31, sleep=0.5)
-        emu_manager.mouse_click(49, 31, sleep=0.5)
-        emu_manager.mouse_click(49, 31, sleep=0.5)
-
+        shiki_utils.soul_change("irabaki.png", "ira_soulset.png")
 
         # Wait for invitation
         logger.info("Waiting for party invitation...")
