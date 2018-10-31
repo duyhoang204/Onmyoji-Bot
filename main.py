@@ -135,7 +135,7 @@ def process_battle(mob_pos, is_boss):
 
     # Wait for the back button to appear
     try:
-        screen_processor.wait("realm_back_btn.png", sleep=0.3, click=False, wait_count=50)
+        screen_processor.wait("realm_back_btn.png", (0, 0, 100, 100), sleep=0.3, click=False)
     except screen_processor.ImageNotFoundException:
         return
 
