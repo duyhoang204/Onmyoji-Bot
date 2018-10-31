@@ -1,4 +1,3 @@
 D:
 cd ads_bot
-python orochi.py
-pause
+python orochi.py 1

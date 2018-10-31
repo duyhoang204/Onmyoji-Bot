@@ -8,12 +8,12 @@ class DemonEncounter:
     def __init__(self):
         pass
 
-    def start(self):
-        if not is_in_town():
+    def start(self, restart=False):
+        if restart:
             logger.info("Restarting game...")
             restart_game()
-            # go_to_town()
-            # time.sleep(5)
+            go_to_main_screen()
+            time.sleep(5)
 
         shiki_utils.soul_change("shuten.png", "nura_soulset.png")
 
@@ -82,13 +82,15 @@ class DemonEncounter:
         start = time.time()
         while time.time() - start < 90:
             emu_manager.mouse_click(*DE_BOSS_FIGHT)
-            if screen_processor.abs_search("shiki_icon.png",
+            if screen_processor.abs_search("de_boss_screen.png",
                                         (WINDOW_WIDTH - 300, WINDOW_HEIGHT - 300, WINDOW_WIDTH, WINDOW_HEIGHT))[0] != -1:
-                break
+                return True
 
+        # Close panel
+        emu_manager.mouse_click(1132, 86)
         time.sleep(5)
         # Make sure that we're not accidentally in boss fight
-        return screen_processor.abs_search("shiki_icon.png",
+        return screen_processor.abs_search("de_boss_screen.png",
                                         (WINDOW_WIDTH - 300, WINDOW_HEIGHT - 300, WINDOW_WIDTH, WINDOW_HEIGHT))[0] != -1
 
     def kill_popups(self, run_time, start_time=time.time()):
@@ -103,7 +105,9 @@ class DemonEncounter:
         logger.info("End hunting for in-game popup.")
 
 
+import sys
 if __name__ == "__main__":
+    restart = int(sys.argv[1])
     from concurrent.futures import ThreadPoolExecutor, as_completed
     start_time = time.time()
     run_time = bot_cfg.get_run_time_in_seconds()
@@ -112,7 +116,7 @@ if __name__ == "__main__":
     demon_encounter = DemonEncounter()
     logger.info("Starting demon encounter bot...")
     with ThreadPoolExecutor(max_workers=4) as executor:
-        futures = {executor.submit(demon_encounter.start),
+        futures = {executor.submit(demon_encounter.start, restart),
                    executor.submit(demon_encounter.kill_popups, run_time, start_time=start_time)}
 
         for f in as_completed(futures):

@@ -771,6 +771,9 @@ def go_to_main_screen():
         if screen_processor.abs_search("login_announcement.png", precision=0.9)[0] != -1:
             emu_manager.mouse_click(*CLOSE_ANNOUNCEMENT_BTN)
             time.sleep(1)
+
+        # Policy button, in case we log in while another device is currently logged in
+        screen_processor.abs_search("confirm_policy_btn.png", click=True)
         time.sleep(1.5)
         emu_manager.mouse_click(*LOGIN_BTN)
     time.sleep(15)

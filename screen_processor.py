@@ -94,9 +94,9 @@ def abs_search_multi(file_name, pos_box=None, precision=0.99):
     return [(x[0]+pos_box[0], x[1]+pos_box[1]) for x in result]
 
 
-def wait(img, area=None, click=False, sleep=0.7, wait_count=100, click_offset=(0,0), pre_sleep=0):
+def wait(img, area=None, click=False, sleep=0.7, wait_count=100, click_offset=(0,0), pre_sleep=0, precision=0.8):
     for i in range(0, wait_count):
-        pos = abs_search(img, area)
+        pos = abs_search(img, area, precision=precision)
         if pos[0] != -1:
             logger.info("wait(): found {}!".format(img))
             if click:
@@ -110,6 +110,23 @@ def wait(img, area=None, click=False, sleep=0.7, wait_count=100, click_offset=(0
     # Image not found
     raise ImageNotFoundException("Could not find {} on screen!".format(img))
 
+def wait_disappear(img, area=None, sleep=0.7, wait_count=100, precision=0.9):
+    for i in range(0, wait_count):
+        pos = abs_search(img, area, precision=precision)
+        if pos[0] != -1:
+            time.sleep(sleep)
+        else:
+            return
+
+    raise ImageNotFoundException("Image {} still on screen!".format(img))
+
+def get_image_res(file_name):
+    path = get_image_path(file_name)
+
+    img = cv2.imread(path)
+    height, width, channels = img.shape
+
+    return width, height
 
 def get_image_path(filename):
     return "{}/{}".format(IMAGE_FOLDER, filename)
