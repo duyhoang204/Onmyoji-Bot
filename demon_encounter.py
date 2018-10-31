@@ -86,8 +86,9 @@ class DemonEncounter:
                                         (WINDOW_WIDTH - 300, WINDOW_HEIGHT - 300, WINDOW_WIDTH, WINDOW_HEIGHT))[0] != -1:
                 return True
 
-        # Close panel
-        emu_manager.mouse_click(1132, 86)
+        if screen_processor.abs_search("de_boss_panel.png")[0] != -1:
+            # Close panel
+            emu_manager.mouse_click(1132, 86)
         time.sleep(5)
         # Make sure that we're not accidentally in boss fight
         return screen_processor.abs_search("de_boss_screen.png",
