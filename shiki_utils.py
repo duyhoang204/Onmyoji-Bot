@@ -23,9 +23,9 @@ def soul_change(shiki_img, soulset_img):
         time.sleep(0.7)
 
     # Back
-    emu_manager.mouse_click(49, 31, sleep=0.5)
-    emu_manager.mouse_click(49, 31, sleep=0.5)
-    emu_manager.mouse_click(49, 31, sleep=0.5)
+    emu_manager.mouse_click(49, 31, sleep=1)
+    emu_manager.mouse_click(49, 31, sleep=1)
+    emu_manager.mouse_click(49, 31, sleep=1)
 
 def onmyoji_change():
     pass
