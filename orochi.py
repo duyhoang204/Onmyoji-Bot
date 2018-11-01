@@ -20,7 +20,7 @@ class Orochi:
         while screen_processor.abs_search("party_orochi.png")[0] == -1:
             time.sleep(2)
         logger.info("Found party!")
-        time.sleep(2)
+        time.sleep(1)
         screen_processor.abs_search("party_check.png", click=True)
         logger.info("Joined party!")
 
@@ -36,12 +36,13 @@ class Orochi:
                 time.sleep(1)
 
             quit_party = False
-            while screen_processor.abs_search("realm_back_btn.png", (0,0,71,94))[0] == -1:
-                emu_manager.mouse_click(634, 547)
+            while screen_processor.abs_search("auto_icon.png", (0,0,100,100))[0] == -1:
+                emu_manager.mouse_click(953, 570)
                 if screen_processor.abs_search("party_invite_btn.png", *PARTY_SLOT_2_REGION)[0] != -1:
                     # Host quit!
                     quit_party = True
                     break
+                time.sleep(0.5)
 
             if quit_party:
                 break
@@ -63,17 +64,44 @@ class Orochi:
 
 import sys
 if __name__ == "__main__":
-    restart = int(sys.argv[1])
-    from concurrent.futures import ThreadPoolExecutor, as_completed
-    start_time = time.time()
-    run_time = bot_cfg.get_run_time_in_seconds()
-    hwnd = set_up()
+    # restart = int(sys.argv[1])
+    # from concurrent.futures import ThreadPoolExecutor, as_completed
+    # start_time = time.time()
+    # run_time = bot_cfg.get_run_time_in_seconds()
+    # hwnd = set_up()
+    #
+    # orochi = Orochi()
+    # logger.info("Starting demon encounter bot...")
+    # with ThreadPoolExecutor(max_workers=4) as executor:
+    #     futures = {executor.submit(orochi.start, restart),
+    #                executor.submit(orochi.kill_popups, run_time, start_time=start_time)}
+    #
+    #     for f in as_completed(futures):
+    #         rs = f.result()
+    battle_count = 0
+    battle_start = time.time()
+    while True:
+        screen_processor.wait("auto_icon.png", precision=0.95)
+        while screen_processor.abs_search("auto_icon.png")[0] != -1:
+            time.sleep(1)
 
-    orochi = Orochi()
-    logger.info("Starting demon encounter bot...")
-    with ThreadPoolExecutor(max_workers=4) as executor:
-        futures = {executor.submit(orochi.start, restart),
-                   executor.submit(orochi.kill_popups, run_time, start_time=start_time)}
+        battle_count += 1
+        battle_end = time.time()
+        quit_party = False
+        while screen_processor.abs_search("realm_back_btn.png", (0, 0, 100, 100))[0] == -1:
+            emu_manager.mouse_click(953, 570)
+            if screen_processor.abs_search("party_invite_btn.png", PARTY_SLOT_2_REGION)[0] != -1:
+                break
+            time.sleep(0.5)
 
-        for f in as_completed(futures):
-            rs = f.result()
+        if quit_party:
+            # Host quit!
+            logger.info("Host quit! Ending auto...")
+            buff_off([1])
+            duration = battle_end - battle_start
+            hour = int(duration / (60 * 60))
+            mins = int((duration - hour * 60 * 60) / 60)
+            secs = duration % 60
+            logger.info("Time: {}h{}m{}s\nSushi: {}".format(hour, mins, secs, battle_count * 4))
+            quit_party = True
+            break

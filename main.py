@@ -346,7 +346,7 @@ def buff_on(buffs=list()):
     if len(buffs) == 0 or "0" in buffs:
         return
     # Click on buff
-    buff_btn = screen_processor.wait("buff_btn.png", BUFF_BTN_BOX, click=False)
+    buff_btn = screen_processor.wait("buff_btn.png", click=False)
     emu_manager.mouse_click(buff_btn[0], buff_btn[1] - 30, sleep=1.5)
     logger.info("Clicked buff")
     for buff in buffs:
@@ -379,7 +379,7 @@ def buff_off(buffs=list()):
     if len(buffs) == 0 or "0" in buffs:
         return
 
-    buff_btn = screen_processor.wait("buff_btn.png", BUFF_BTN_BOX, click=False, sleep=1)
+    buff_btn = screen_processor.wait("buff_btn.png", click=False)
     emu_manager.mouse_click(buff_btn[0], buff_btn[1] - 30, sleep=1.5)
     logger.info("Clicked buff")
     # Probably have no more than 10 buffs
@@ -749,7 +749,7 @@ def do_realm_battle(i, j, row, win_streak, retry=False):
 
     win = False
     while screen_processor.abs_search("realm_reward_icon.png")[0] == -1:
-        if screen_processor.abs_search("battle_reward.png")[0] != -1:
+        if screen_processor.abs_search("battle_reward.png", precision=0.94)[0] != -1:
             win = True
         # Click a random place
         emu_manager.mouse_click(153, 573, sleep=1)

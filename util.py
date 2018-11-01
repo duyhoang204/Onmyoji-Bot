@@ -1,5 +1,6 @@
 import random
 import time
+from logging.handlers import TimedRotatingFileHandler
 
 import cv2
 import logging
@@ -32,10 +33,9 @@ def get_logger(name='main'):
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s %(levelname)s: %(message)s',
                         handlers=[
-                            logging.FileHandler("logs/{}.log".format(name)),
-                            logging.StreamHandler()
+                            logging.StreamHandler(),
+                            TimedRotatingFileHandler("logs/{}.log".format(name), when="midnight", interval=1)
                         ]
                         )
-    # )
     logger = logging.getLogger(name)
     return logger
