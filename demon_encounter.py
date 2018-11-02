@@ -33,11 +33,18 @@ class DemonEncounter:
             time.sleep(5)
 
         logger.info("Boss fight started!")
-        while screen_processor.abs_search("shiki_icon.png")[0] == -1:
+        while screen_processor.abs_search("de_boss_lb.png")[0] == -1:
             emu_manager.mouse_click(*DE_DECOY_TARGET)
             time.sleep(1)
 
         logger.info("Boss fight ended!")
+
+        # Back out
+        emu_manager.mouse_click(43, 43, sleep=1.5)
+        emu_manager.mouse_click(746, 424)
+
+        logger.info("Ended automation")
+        FINISHED_MAIN_LOOP[0] = True
 
     def join_boss_fight(self):
         # Open chat
