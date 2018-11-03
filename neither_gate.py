@@ -1,3 +1,4 @@
+import shiki_utils
 from main import *
 
 logger = util.get_logger()
@@ -13,6 +14,9 @@ class NeitherGate:
             restart_game()
             go_to_town()
             time.sleep(5)
+
+        shiki_utils.soul_change("tamamo.png", "nura_soulset.png")
+        time.sleep(3)
 
         # Click on Hunt lantern
         emu_manager.mouse_click(*HUNT_LANTERN)

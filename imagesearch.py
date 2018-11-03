@@ -72,9 +72,13 @@ def region_grabber_v2(region, hwnd):
     im = im.crop(region)
 
     win32gui.DeleteObject(saveBitMap.GetHandle())
-    saveDC.DeleteDC()
-    mfcDC.DeleteDC()
-    win32gui.ReleaseDC(hwnd, hwndDC)
+    try:
+        saveDC.DeleteDC()
+        mfcDC.DeleteDC()
+        win32gui.ReleaseDC(hwnd, hwndDC)
+    except:
+        print("Could not delete DC! Retrying..")
+        return region_grabber_v2(region, hwnd)
 
     if result == 1:
         # PrintWindow Succeeded

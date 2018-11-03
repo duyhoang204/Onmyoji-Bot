@@ -13,7 +13,7 @@ class Orochi:
             restart_game()
             go_to_main_screen()
 
-        shiki_utils.soul_change("irabaki.png", "ira_soulset.png")
+        shiki_utils.soul_change("irabaki-1.png", "ira_soulset.png")
 
         # Wait for invitation
         logger.info("Waiting for party invitation...")
