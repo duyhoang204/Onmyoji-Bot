@@ -7,6 +7,8 @@ def soul_change(shiki_img, soulset_img):
     screen_processor.abs_search("bottom_scroll.png", precision=0.9, click=True)
     screen_processor.wait("shiki_icon.png", precision=0.9, click=True)
     screen_processor.wait("tho.png")
+    emu_manager.mouse_click(466, 94, sleep=1)
+    emu_manager.mouse_click(708, 112, sleep=0.5)
     screen_processor.wait(shiki_img, click=True)
     # Click on soul set
     emu_manager.mouse_click(553, 187)
