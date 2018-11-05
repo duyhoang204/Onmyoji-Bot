@@ -40,7 +40,9 @@ class Orochi:
             battle_count += 1
             battle_end = time.time()
             quit_party = False
-            while screen_processor.abs_search("realm_back_btn.png", (0, 0, 100, 100))[0] == -1:
+            while screen_processor.abs_search("shiki_icon.png",
+                                              (1090, 600, WINDOW_WIDTH, WINDOW_HEIGHT),
+                                              precision=0.9)[0] == -1:
                 emu_manager.mouse_click(953, 570)
                 if screen_processor.abs_search("party_invite_btn.png", PARTY_SLOT_2_REGION)[0] != -1:
                     quit_party = True
