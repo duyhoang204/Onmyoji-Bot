@@ -66,6 +66,8 @@ class Orochi:
                 emu_manager.mouse_click(763, 430, sleep=1)
                 break
 
+        FINISHED_MAIN_LOOP[0] = True
+
     def kill_popups(self, run_time, start_time=time.time()):
         logger.info("Start hunting for in-game popup...")
         while not FINISHED_MAIN_LOOP[0]:
