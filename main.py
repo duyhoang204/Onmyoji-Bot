@@ -473,11 +473,11 @@ def do_main_loop(run_time, start_time=time.time(), hwnd=None):
 
                 logger.info("Starting payk battle..")
                 emu_manager.mouse_click(*BATTLE_START_BTN)
-
-                # Wait for map
-                time.sleep(2)
+                screen_processor.wait("auto_icon.png")
                 while screen_processor.abs_search("auto_icon.png")[0] != -1:
                     time.sleep(2)
+
+                # Wait for map
                 while screen_processor.abs_search("back.png", BACK_BTN_BOX)[0] == -1:
                     emu_manager.mouse_click(*MAP_20)
 
@@ -761,6 +761,7 @@ def do_realm_battle(i, j, row, win_streak, retry=False):
         emu_manager.mouse_click(153, 573, sleep=1)
         emu_manager.mouse_click(153, 573, sleep=1)
 
+    time.sleep(1)
     # Check win and return
     return win, True
 
