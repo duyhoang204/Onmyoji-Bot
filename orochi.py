@@ -50,6 +50,8 @@ class Orochi:
                     quit_party = True
                     break
 
+                time.sleep(2)
+
             if quit_party:
                 # Host quit!
                 logger.info("Host quit! Ending auto...")
