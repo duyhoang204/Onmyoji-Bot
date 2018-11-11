@@ -1,11 +1,13 @@
 import shiki_utils
+from base_task import BaseTask
 from main import *
 
 logger = util.get_logger()
 
 
-class DemonEncounter:
+class DemonEncounter(BaseTask):
     def __init__(self):
+        super(BaseTask, self).__init__()
         pass
 
     def start(self, restart=False):
@@ -15,7 +17,7 @@ class DemonEncounter:
             go_to_main_screen()
             time.sleep(5)
 
-        shiki_utils.soul_change("shuten.png", "nura_soulset.png")
+        # shiki_utils.soul_change("shuten.png", "nura_soulset.png")
 
         count = 0
         while not self.join_boss_fight():
@@ -48,7 +50,7 @@ class DemonEncounter:
 
     def join_boss_fight(self):
         # Open chat
-        if screen_processor.abs_search("sidebar_chat.png", SIDEBAR_BOX, precision=0.85)[0] == -1:
+        while screen_processor.abs_search("sidebar_chat.png", SIDEBAR_BOX, precision=0.85)[0] == -1:
             emu_manager.mouse_click(*MESSAGE_ICON_MAIN, sleep=1.5)
             emu_manager.mouse_click(*GUILD_CHAT_MAIN)
 
@@ -89,7 +91,7 @@ class DemonEncounter:
         start = time.time()
         while time.time() - start < 90:
             emu_manager.mouse_click(*DE_BOSS_FIGHT)
-            if screen_processor.abs_search("de_boss_screen.png", precision=0.9)[0] != -1:
+            if screen_processor.abs_search("gather_sign.png", precision=0.9)[0] != -1:
                 return True
 
         if screen_processor.abs_search("de_boss_panel.png")[0] != -1:
@@ -97,18 +99,7 @@ class DemonEncounter:
             emu_manager.mouse_click(1132, 86)
         time.sleep(5)
         # Make sure that we're not accidentally in boss fight
-        return screen_processor.abs_search("de_boss_screen.png", precision=0.9)[0] != -1
-
-    def kill_popups(self, run_time, start_time=time.time()):
-        logger.info("Start hunting for in-game popup...")
-        while not FINISHED_MAIN_LOOP[0]:
-            if screen_processor.abs_search("wanted_4.png", WANTED_2_SEARCH_BOX)[0] != -1:
-                # Deny wanted req
-                logger.info("WANTED FOUND!")
-                emu_manager.mouse_click(*WANTED_CANCEL)
-
-            time.sleep(1)
-        logger.info("End hunting for in-game popup.")
+        return screen_processor.abs_search("gather_sign.png", precision=0.9)[0] != -1
 
 
 import sys

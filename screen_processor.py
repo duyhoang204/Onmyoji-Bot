@@ -110,15 +110,17 @@ def wait(img, area=None, click=False, sleep=0.7, wait_count=100, click_offset=(0
     # Image not found
     raise ImageNotFoundException("Could not find {} on screen!".format(img))
 
-def wait_disappear(img, area=None, sleep=0.7, wait_count=100, precision=0.9):
+
+def wait_disappear(img, area=None, sleep=0.7, wait_count=100, precision=0.9, click=False):
     for i in range(0, wait_count):
-        pos = abs_search(img, area, precision=precision)
+        pos = abs_search(img, area, precision=precision, click=click)
         if pos[0] != -1:
             time.sleep(sleep)
         else:
             return
 
     raise ImageNotFoundException("Image {} still on screen!".format(img))
+
 
 def get_image_res(file_name):
     path = get_image_path(file_name)
