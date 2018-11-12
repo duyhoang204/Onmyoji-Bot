@@ -80,7 +80,14 @@ class Orochi:
             if screen_processor.abs_search("party_gear.png", click=True)[0] != -1:
                 # Auto join party
                 logger.info("Auto joining party...!")
+            if not emu_manager.is_running(APP_PKG_NAME):
+                logger.info("Game crashed, restarting...".format(APP_PKG_NAME))
+                emu_manager.start_app(APP_PKG_NAME)
+                logger.info("App started successfully.")
+                go_to_main_screen()
+
             time.sleep(1)
+
         logger.info("End hunting for in-game popup.")
 
 import sys
