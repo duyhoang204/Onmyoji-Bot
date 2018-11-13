@@ -36,7 +36,7 @@ class DemonEncounter(BaseTask):
 
         logger.info("Boss fight started!")
         while screen_processor.abs_search("de_boss_lb.png")[0] == -1:
-            emu_manager.mouse_click(*DE_DECOY_TARGET)
+            screen_processor.abs_search("decoy_debuff.png", (600, 350, 800, 500), click=True)
             time.sleep(1)
 
         logger.info("Boss fight ended!")
