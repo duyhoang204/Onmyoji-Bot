@@ -6,14 +6,16 @@ logger = util.get_logger()
 
 class SBoss(BaseTask):
 
-    def __init__(self, start_time, duration):
+    def __init__(self, start_time, duration, boss_count):
         super(BaseTask, self).__init__()
         self.start_time = start_time
         self.duration = duration
+        self.boss_target = boss_count
 
     def start(self, restart=False):
         boss_found = False
-        while time.time() - self.start_time < self.duration:
+        boss_count = 0
+        while time.time() - self.start_time < self.duration or boss_count >= self.boss_target:
             while True:
                 screen_processor.wait("dungeon_fight.png", click=True)
                 screen_processor.wait("auto_icon.png", (0, WINDOW_HEIGHT - 300, 300, WINDOW_HEIGHT))
@@ -35,7 +37,8 @@ class SBoss(BaseTask):
             #     FINISHED_MAIN_LOOP[0] = True
             #     return
             self.fight_boss()
-
+            boss_count += 1
+            
         FINISHED_MAIN_LOOP[0] = True
 
     def fight_boss(self):
@@ -90,9 +93,10 @@ if __name__ == "__main__":
     from concurrent.futures import ThreadPoolExecutor, as_completed
     start_time = time.time()
     run_time = bot_cfg.get_run_time_in_seconds()
+    boss_count = int(bot_cfg.get_property("SBoss", "boss_count"))
     hwnd = set_up()
 
-    sboss = SBoss(start_time, run_time)
+    sboss = SBoss(start_time, run_time, boss_count)
     logger.info("Starting demon encounter bot...")
     with ThreadPoolExecutor(max_workers=4) as executor:
         futures = {executor.submit(sboss.start, restart),
