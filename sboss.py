@@ -22,8 +22,8 @@ class SBoss(BaseTask):
                 # screen_processor.wait_disappear("auto_icon.png", (0, WINDOW_HEIGHT - 300, 300, WINDOW_HEIGHT))
                 while screen_processor.abs_search("dungeon_fight.png")[0] == -1:
                     emu_manager.mouse_click(630, 550)
-                    time.sleep(1)
-
+                    time.sleep(0.5)
+                time.sleep(1.5)
                 boss_pos = screen_processor.abs_search("sboss_found_2.png")
                 if boss_pos[0] != -1:
                     logger.info("Found boss!")
