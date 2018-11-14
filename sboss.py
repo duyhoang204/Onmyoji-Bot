@@ -43,7 +43,10 @@ class SBoss(BaseTask):
         # screen_processor.wait("sboss_my.png", precision=0.94, click=True)
         boss_killed = False
         screen_processor.wait("sboss_reward_lantern.png")
-        emu_manager.mouse_click(*SBOSS_NORMAL_ATTACK)
+        if screen_processor.abs_search("sboss_5_star.png",(96, 209, 212, 317))[0] != -1:
+            emu_manager.mouse_click(*SBOSS_ALLOUT_ATTACK)
+        else:
+            emu_manager.mouse_click(*SBOSS_NORMAL_ATTACK)
         while not boss_killed:
             emu_manager.mouse_click(*SBOSS_FIGHT)
             time.sleep(1.5)
