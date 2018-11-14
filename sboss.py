@@ -59,7 +59,9 @@ class SBoss(BaseTask):
 
             # Battle stuff
             while screen_processor.abs_search("auto_icon.png")[0] != -1:
-                screen_processor.abs_search("decoy_debuff.png", (600, 350, 800, 500), precision=0.94, click=True)
+                decoy = screen_processor.abs_search("decoy_debuff.png", (600, 350, 800, 500))
+                if decoy[0] != -1:
+                    emu_manager.mouse_click(decoy[0] + 20, decoy[1] + 30)
                 time.sleep(1.5)
 
             screen_processor.wait("sboss_fight_end.png")
