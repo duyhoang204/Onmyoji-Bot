@@ -22,7 +22,6 @@ class SBoss(BaseTask):
                     emu_manager.mouse_click(630, 550)
                     time.sleep(1)
 
-                time.sleep(1.5)
                 boss_pos = screen_processor.abs_search("sboss_found_2.png")
                 if boss_pos[0] != -1:
                     logger.info("Found boss!")
