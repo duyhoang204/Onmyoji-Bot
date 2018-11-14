@@ -38,7 +38,7 @@ class SBoss(BaseTask):
             #     return
             self.fight_boss()
             boss_count += 1
-            
+
         FINISHED_MAIN_LOOP[0] = True
 
     def fight_boss(self):
