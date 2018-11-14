@@ -43,7 +43,7 @@ class PDQ(BaseTask):
                 time.sleep(2)
 
             won = 0
-            while True:
+            while screen_processor.abs_search("pdq_complete.png", precision=0.93)[0] == -1:
                 if screen_processor.abs_search("pdq_enemy_house.png")[0] != -1:
                     logger.info("We lost :(")
                     break
@@ -51,6 +51,10 @@ class PDQ(BaseTask):
                     won += 1
                     logger.info("Win: {}".format(won))
                     screen_processor.wait_disappear("battle_reward.png", click=True)
+                    time.sleep(2)
+                    if screen_processor.abs_search("pdq_complete.png", precision=0.93)[0] != -1:
+                        break
+
                     # Keep battling
                     emu_manager.mouse_click(*BATTLE_START_BTN)
                     screen_processor.wait("auto_icon.png")
