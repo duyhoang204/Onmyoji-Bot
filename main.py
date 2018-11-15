@@ -801,7 +801,16 @@ def is_in_town():
 def select_team(index=0):
     # Select team
     emu_manager.mouse_click(84, 681, 1)
-    team_pos = REALM_TEAMS[index]
+    if index > 2:
+        time.sleep(0.5)
+        for i in range(0, int(index/3)):
+            emu_manager.mouse_drag(*REAL_SELECT_TEAM_DRAG_POINT,
+                                   REAL_SELECT_TEAM_DRAG_POINT[0],
+                                   REAL_SELECT_TEAM_DRAG_POINT[1]-REALM_SELECT_TEAM_HEIGHT, duration=2000)
+            time.sleep(3)
+        team_pos = REALM_TEAMS[index%3]
+    else:
+        team_pos = REALM_TEAMS[index]
     emu_manager.mouse_click(*team_pos)
     screen_processor.wait("realm_team_set.png", click=True)
 
