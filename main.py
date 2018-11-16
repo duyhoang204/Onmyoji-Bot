@@ -804,7 +804,8 @@ def select_team(index=0):
     if index > 2:
         time.sleep(0.5)
         for i in range(0, int(index/3)):
-            emu_manager.mouse_drag(*REAL_SELECT_TEAM_DRAG_POINT,
+            emu_manager.mouse_drag(REAL_SELECT_TEAM_DRAG_POINT[0],
+                                   REAL_SELECT_TEAM_DRAG_POINT[1],
                                    REAL_SELECT_TEAM_DRAG_POINT[0],
                                    REAL_SELECT_TEAM_DRAG_POINT[1]-REALM_SELECT_TEAM_HEIGHT, duration=2000)
             time.sleep(3)
