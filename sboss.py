@@ -58,13 +58,15 @@ class SBoss(BaseTask):
 
         screen_processor.wait("sboss_reward_lantern.png")
 
-        is_high_level_boss = screen_processor.abs_search("sboss_5_star.png",(96, 209, 212, 317), precision=0.94)[0] != -1 \
+        is_high_level_boss = screen_processor.abs_search("sboss_4_star.png",(96, 209, 212, 317), precision=0.94)[0] != -1 \
+                            or screen_processor.abs_search("sboss_5_star.png",(96, 209, 212, 317), precision=0.94)[0] != -1 \
                             or screen_processor.abs_search("sboss_6_star.png",(96, 209, 212, 317), precision=0.94)[0] != -1
         self.fight_boss(is_high_level_boss)
 
         emu_manager.mouse_click(*SBOSS_CLOSE_POPUP, sleep=1)
         # TODO change this with image
-        emu_manager.mouse_click(103, 666, sleep=1.5)
+        emu_manager.mouse_click(204, 666, sleep=1.5)
+        # emu_manager.mouse_click(392, 392)
         emu_manager.mouse_click(522, 392)
         # emu_manager.mouse_click(273, 392)
 
@@ -83,21 +85,24 @@ class SBoss(BaseTask):
                 emu_manager.mouse_click(*SBOSS_MAP_TARGET)
                 return
 
-        self.fight_boss()
+        self.fight_boss(mode="leech")
 
-    def fight_boss(self, is_high_level_boss=False):
+    def fight_boss(self, is_high_level_boss=False, mode="farm"):
         # screen_processor.wait("sboss_my.png", precision=0.94, click=True)
         boss_killed = False
         attempt = 0
-        if is_high_level_boss and attempt == 0:
+        if is_high_level_boss and attempt == 0 and mode == "farm":
             emu_manager.mouse_click(*SBOSS_ALLOUT_ATTACK)
         else:
             emu_manager.mouse_click(*SBOSS_NORMAL_ATTACK)
         while not boss_killed:
+            logger.info("Attempt: {}".format(attempt))
             emu_manager.mouse_click(*SBOSS_FIGHT)
             time.sleep(1.5)
             if screen_processor.abs_search("sboss_tea.png")[0] != -1:
-                time.sleep(30)
+                # time.sleep(30)
+                emu_manager.mouse_click(*SBOSS_USE_JADE, sleep=1.5)
+
                 # Close popup
                 emu_manager.mouse_click(*SBOSS_CLOSE_TEA_POPUP)
                 self.fight_boss(is_high_level_boss)
@@ -107,7 +112,7 @@ class SBoss(BaseTask):
             except:
                 return
 
-            if is_high_level_boss and attempt == 0:
+            if attempt < 2 and mode == "farm":
                 select_team(3)
             else:
                 select_team(2)
