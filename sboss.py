@@ -6,21 +6,26 @@ logger = util.get_logger()
 
 class SBoss(BaseTask):
 
-    def __init__(self, start_time, duration, boss_count, mode):
+    def __init__(self, start_time, duration, boss_count, mode, farm_mode):
         super(BaseTask, self).__init__()
         self.start_time = start_time
         self.duration = duration
         self.boss_target = boss_count
-        self.mode = mode
+        self.auto_mode = mode
+        self.farm_mode = farm_mode
 
     def start(self, restart=False):
         if restart:
             logger.info("Restarting game...")
             restart_game()
-            go_to_main_screen()
-            time.sleep(5)
-            if self.mode == "leech":
+            if self.auto_mode == "leech":
+                go_to_main_screen()
+                time.sleep(5)
                 emu_manager.mouse_click(956, 466)
+            elif self.auto_mode == "farm":
+                go_to_explore_screen()
+                time.sleep(5)
+                self.go_to_farm()
 
         boss_count = 0
         while time.time() - self.start_time < self.duration:
@@ -57,18 +62,18 @@ class SBoss(BaseTask):
             emu_manager.mouse_click(960, 500)
 
         screen_processor.wait("sboss_reward_lantern.png")
+        is_high_level_boss = 0
+        if screen_processor.abs_search("sboss_4_star.png",(96, 209, 212, 317), precision=0.94)[0] != -1:
+            is_high_level_boss = 4
+        elif screen_processor.abs_search("sboss_5_star.png",(96, 209, 212, 317), precision=0.94)[0] != -1:
+            is_high_level_boss = 5
+        elif screen_processor.abs_search("sboss_6_star.png",(96, 209, 212, 317), precision=0.94)[0] != -1:
+            is_high_level_boss = 6
 
-        is_high_level_boss = screen_processor.abs_search("sboss_4_star.png",(96, 209, 212, 317), precision=0.94)[0] != -1 \
-                            or screen_processor.abs_search("sboss_5_star.png",(96, 209, 212, 317), precision=0.94)[0] != -1 \
-                            or screen_processor.abs_search("sboss_6_star.png",(96, 209, 212, 317), precision=0.94)[0] != -1
         self.fight_boss(is_high_level_boss)
 
         emu_manager.mouse_click(*SBOSS_CLOSE_POPUP, sleep=1)
-        # TODO change this with image
-        emu_manager.mouse_click(204, 666, sleep=1.5)
-        # emu_manager.mouse_click(392, 392)
-        emu_manager.mouse_click(522, 392)
-        # emu_manager.mouse_click(273, 392)
+        self.go_to_farm()
 
     def leech(self):
         screen_processor.wait("sboss_reward_lantern.png")
@@ -87,15 +92,16 @@ class SBoss(BaseTask):
 
         self.fight_boss(mode="leech")
 
-    def fight_boss(self, is_high_level_boss=False, mode="farm"):
+    def fight_boss(self, is_high_level_boss=0, mode="farm"):
         # screen_processor.wait("sboss_my.png", precision=0.94, click=True)
         boss_killed = False
         attempt = 0
-        if is_high_level_boss and attempt == 0 and mode == "farm":
-            emu_manager.mouse_click(*SBOSS_ALLOUT_ATTACK)
-        else:
-            emu_manager.mouse_click(*SBOSS_NORMAL_ATTACK)
         while not boss_killed:
+            if is_high_level_boss and attempt == 0 and mode == "farm":
+                emu_manager.mouse_click(*SBOSS_ALLOUT_ATTACK)
+            else:
+                emu_manager.mouse_click(*SBOSS_NORMAL_ATTACK)
+
             logger.info("Attempt: {}".format(attempt))
             emu_manager.mouse_click(*SBOSS_FIGHT)
             time.sleep(1.5)
@@ -105,14 +111,16 @@ class SBoss(BaseTask):
 
                 # Close popup
                 emu_manager.mouse_click(*SBOSS_CLOSE_TEA_POPUP)
-                self.fight_boss(is_high_level_boss)
+                continue
 
             try:
                 screen_processor.wait("realm_back_btn.png")
             except:
                 return
 
-            if attempt < 2 and mode == "farm":
+            if mode == "farm" and ((is_high_level_boss == 4 and attempt < 2)
+                                   or (is_high_level_boss == 5 and attempt < 3)
+                                   or (is_high_level_boss == 6 and attempt < 4)):
                 select_team(3)
             else:
                 select_team(2)
@@ -134,6 +142,14 @@ class SBoss(BaseTask):
                 emu_manager.mouse_click(630, 550)
                 time.sleep(1.5)
 
+    def go_to_farm(self):
+        emu_manager.mouse_click(204, 666, sleep=1.5)
+        # emu_manager.mouse_click(392, 392)
+        if self.farm_mode == "si":
+            emu_manager.mouse_click(1000, 392)
+        elif self.farm_mode == "orochi":
+            emu_manager.mouse_click(500, 392)
+
 
 import sys
 if __name__ == "__main__":
@@ -147,9 +163,10 @@ if __name__ == "__main__":
     run_time = bot_cfg.get_run_time_in_seconds()
     boss_count = int(bot_cfg.get_property("SBoss", "boss_count"))
     mode = bot_cfg.get_property("SBoss", "auto_mode")
+    farm_mode = bot_cfg.get_property("SBoss", "farm_mode")
     hwnd = set_up()
 
-    sboss = SBoss(start_time, run_time, boss_count, mode)
+    sboss = SBoss(start_time, run_time, boss_count, mode, farm_mode)
     logger.info("Starting demon encounter bot...")
     with ThreadPoolExecutor(max_workers=4) as executor:
         futures = {executor.submit(sboss.start, restart),

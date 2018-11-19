@@ -17,7 +17,7 @@ class DemonEncounter(BaseTask):
             go_to_main_screen()
             time.sleep(5)
 
-        shiki_utils.soul_change("shuten.png", "nura_soulset.png")
+        # shiki_utils.soul_change("shuten.png", "nura_soulset.png")
 
         count = 0
         while not self.join_boss_fight():
