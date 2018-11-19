@@ -121,7 +121,7 @@ class SBoss(BaseTask):
             if mode == "farm" and ((is_high_level_boss == 4 and attempt < 3)
                                    or (is_high_level_boss == 5 and attempt < 4)
                                    or (is_high_level_boss == 6 and attempt < 5)
-                                   or (not is_high_level_boss and attempt < 2)):
+                                   or (not is_high_level_boss and attempt < 1)):
                 select_team(3)
             else:
                 select_team(2)
