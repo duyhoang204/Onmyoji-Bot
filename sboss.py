@@ -118,9 +118,10 @@ class SBoss(BaseTask):
             except:
                 return
 
-            if mode == "farm" and ((is_high_level_boss == 4 and attempt < 2)
-                                   or (is_high_level_boss == 5 and attempt < 3)
-                                   or (is_high_level_boss == 6 and attempt < 4)):
+            if mode == "farm" and ((is_high_level_boss == 4 and attempt < 3)
+                                   or (is_high_level_boss == 5 and attempt < 4)
+                                   or (is_high_level_boss == 6 and attempt < 5)
+                                   or (not is_high_level_boss and attempt < 2)):
                 select_team(3)
             else:
                 select_team(2)
@@ -136,7 +137,8 @@ class SBoss(BaseTask):
 
             screen_processor.wait("sboss_fight_end.png")
             time.sleep(1.5)
-            boss_killed = screen_processor.abs_search("sboss_win.png", precision=0.93)[0] != -1
+            # Only attack once if we're leeching
+            boss_killed = mode == "leech" or screen_processor.abs_search("sboss_win.png", precision=0.93)[0] != -1
             attempt += 1
             while screen_processor.abs_search("sboss_reward_lantern.png", precision=0.94)[0] == -1:
                 emu_manager.mouse_click(630, 550)
