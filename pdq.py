@@ -15,9 +15,11 @@ class PDQ(BaseTask):
             go_to_main_screen()
             time.sleep(5)
 
+        emu_manager.mouse_drag(1000, 400, 200, 400, duration=2000)
+        time.sleep(2)
         # Wait for invitation
-        logger.info("Waiting for party invitation...")
-        while screen_processor.abs_search("pdq_invite.png")[0] == -1:
+        logger.info("Waiting for pdq activation...")
+        while screen_processor.abs_search("pdq_home.png")[0] == -1:
             time.sleep(2)
 
         begin = time.time()
@@ -39,12 +41,14 @@ class PDQ(BaseTask):
         select_team(1)
         time.sleep(1)
         emu_manager.mouse_click(*BATTLE_START_BTN)
-        screen_processor.wait("auto_icon.png")
-        while screen_processor.abs_search("auto_icon.png")[0] != -1:
-            time.sleep(2)
+        # screen_processor.wait("auto_icon.png")
+        # while screen_processor.abs_search("auto_icon.png")[0] != -1:
+        #     time.sleep(2)
 
         won = 0
-        while screen_processor.abs_search("pdq_complete.png", precision=0.93)[0] == -1 or time.time() - begin < 30 * 60:
+        while time.time() - begin < 30 * 60:
+            if screen_processor.abs_search("pdq_complete.png", precision=0.93)[0] != -1:
+                break
             # if screen_processor.abs_search("pdq_enemy_house.png")[0] != -1:
             #     logger.info("We lost :(")
             #     break
