@@ -669,10 +669,13 @@ def enter_realm(start_time, run_time):
         for i, col in enumerate(realm_obj.regions):
             for j, row in enumerate(realm_obj.regions[i]):
                 try:
-                    win, did_battle = do_realm_battle(i, j, row, win_streak)
-                    # Check if won
-                    if not win and bot_cfg.get_property("Realm", "do_retry"):
-                        win, did_battle = do_realm_battle(i, j, row, win_streak, retry=True)
+                    tries = 0
+                    did_battle = False
+                    while tries < 3:
+                        win, did_battle = do_realm_battle(i, j, row, win_streak, tries)
+                        if win:
+                            break
+                        tries += 1
 
                     # Deduct ticket count
                     if win and did_battle:
@@ -707,8 +710,8 @@ class CannotAttackRealmException(BaseException):
     pass
 
 
-def do_realm_battle(i, j, row, win_streak, retry=False):
-    if not retry:
+def do_realm_battle(i, j, row, win_streak, tries=0):
+    if tries == 0:
         win = screen_processor.abs_search("realm_win.png", row)[0] != -1 or \
               screen_processor.abs_search("realm_win_1.png", row)[0] != -1
         lost = screen_processor.abs_search("realm_lost.png", row)[0] != -1
@@ -742,7 +745,7 @@ def do_realm_battle(i, j, row, win_streak, retry=False):
         logger.info("Could not attack attack game {}! Maybe we ran out of tickets?..".format(i * 3 + j + 1))
         raise CannotAttackRealmException
 
-    select_team(1 if retry else 0)
+    select_team(tries)
 
     while screen_processor.abs_search("auto_icon.png", (0, WINDOW_HEIGHT - 300, 300, WINDOW_HEIGHT))[0] == -1:
         emu_manager.mouse_click(*BATTLE_START_BTN, sleep=3)
