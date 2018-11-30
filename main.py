@@ -746,16 +746,24 @@ def do_realm_battle(i, j, row, win_streak, tries=0):
         raise CannotAttackRealmException
 
     select_team(tries)
+    time.sleep(0.5)
 
     while screen_processor.abs_search("auto_icon.png", (0, WINDOW_HEIGHT - 300, 300, WINDOW_HEIGHT))[0] == -1:
-        emu_manager.mouse_click(*BATTLE_START_BTN, sleep=3)
+        emu_manager.mouse_click(*BATTLE_START_BTN, sleep=1)
+
+    if tries == 0:
+        # Target left most member
+        emu_manager.mouse_click(153, 573)
 
     win = False
     while screen_processor.abs_search("realm_reward_icon.png")[0] == -1:
         if screen_processor.abs_search("battle_reward.png", precision=0.94)[0] != -1:
+            # Click a random place
+            emu_manager.mouse_click(153, 573)
             win = True
-        # Click a random place
-        emu_manager.mouse_click(153, 573, sleep=1)
+
+        time.sleep(1)
+
 
     current_streak = win_streak + 1 if win else 1
     if current_streak % 3 == 0:
@@ -776,6 +784,8 @@ def go_to_main_screen():
             emu_manager.mouse_click(*CLOSE_ANNOUNCEMENT_BTN)
             time.sleep(1)
 
+        # Work around for Nox launcher bug
+        screen_processor.abs_search("nox_error.png", precision=0.9, click=True)
         # Policy button, in case we log in while another device is currently logged in
         screen_processor.abs_search("confirm_policy_btn.png", click=True)
         time.sleep(1.5)
@@ -804,6 +814,15 @@ def is_in_town():
 def select_team(index=0):
     # Select team
     emu_manager.mouse_click(84, 681, 1)
+
+    # Scroll to top first
+    while screen_processor.abs_search("select_team_top.png", REALM_SELECT_TEAM_TOP_REGION, precision=0.9)[0] == -1:
+        emu_manager.mouse_drag(REAL_SELECT_TEAM_DRAG_POINT[0],
+                               REAL_SELECT_TEAM_DRAG_POINT[1],
+                               REAL_SELECT_TEAM_DRAG_POINT[0],
+                               REAL_SELECT_TEAM_DRAG_POINT[1] + REALM_SELECT_TEAM_HEIGHT, duration=2000)
+        time.sleep(3.2)
+
     if index > 2:
         time.sleep(0.5)
         for i in range(0, int(index/3)):

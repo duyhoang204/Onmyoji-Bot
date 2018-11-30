@@ -15,19 +15,19 @@ class PDQ(BaseTask):
             go_to_main_screen()
             time.sleep(5)
 
-        emu_manager.mouse_drag(200, 400, 1200, 400, duration=2000)
+        # emu_manager.mouse_drag(200, 400, 1200, 400, duration=2000)
         time.sleep(2)
         # Wait for invitation
         logger.info("Waiting for pdq activation...")
-        while screen_processor.abs_search("pdq_home.png", click=True)[0] == -1:
-            time.sleep(2)
+        while screen_processor.abs_search("pdq_invite.png", click=True)[0] == -1:
+            time.sleep(1)
 
         begin = time.time()
-        # screen_processor.abs_search("bottom_scroll.png", (1000, 550, WINDOW_WIDTH, WINDOW_HEIGHT), precision=0.9, click=True)
-        # # Click on Guild icon in main screen
-        # emu_manager.mouse_click(408, 628)
-        # screen_processor.wait("pdq_icon.png", precision=0.9, click=True)
-        # screen_processor.wait("pdq_target_guild.png", precision=0.94, click=True)
+        screen_processor.abs_search("bottom_scroll.png", (1000, 550, WINDOW_WIDTH, WINDOW_HEIGHT), precision=0.9, click=True)
+        # Click on Guild icon in main screen
+        emu_manager.mouse_click(408, 628)
+        screen_processor.wait("pdq_icon.png", precision=0.9, click=True)
+        screen_processor.wait("pdq_target_guild.png", precision=0.94, click=True)
         screen_processor.wait("pdq_enemy_house.png")
         logger.info("Got to PDQ main screen")
 
