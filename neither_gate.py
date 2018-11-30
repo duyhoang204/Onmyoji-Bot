@@ -32,7 +32,7 @@ class NeitherGate:
         screen_processor.wait("realm_back_btn.png")
         logger.info("Starting battle...")
 
-        select_team()
+        select_team(3)
 
         while screen_processor.abs_search("auto_icon.png", (0, WINDOW_HEIGHT - 300, 300, WINDOW_HEIGHT))[0] == -1:
             # Ensure we clicked Start Battle
