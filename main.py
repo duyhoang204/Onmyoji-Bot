@@ -756,11 +756,14 @@ def do_realm_battle(i, j, row, win_streak, tries=0):
         emu_manager.mouse_click(153, 573)
 
     win = False
+    while screen_processor.abs_search("auto_icon.png", (0, WINDOW_HEIGHT - 300, 300, WINDOW_HEIGHT))[0] != -1:
+        time.sleep(2)
+
     while screen_processor.abs_search("realm_reward_icon.png")[0] == -1:
         if screen_processor.abs_search("battle_reward.png", precision=0.94)[0] != -1:
             # Click a random place
-            emu_manager.mouse_click(153, 573)
             win = True
+        emu_manager.mouse_click(153, 573)
 
         time.sleep(1)
 
