@@ -19,8 +19,13 @@ class PDQ(BaseTask):
         time.sleep(2)
         # Wait for invitation
         logger.info("Waiting for pdq activation...")
+        begin = time.time()
         while screen_processor.abs_search("pdq_invite.png", click=True)[0] == -1:
             time.sleep(1)
+            if time.time() - begin > 30 * 60:
+                logger.info("No one invited me :( Finished pdq")
+                FINISHED_MAIN_LOOP[0] = True
+                return
 
         begin = time.time()
         screen_processor.abs_search("bottom_scroll.png", (1000, 550, WINDOW_WIDTH, WINDOW_HEIGHT), precision=0.9, click=True)

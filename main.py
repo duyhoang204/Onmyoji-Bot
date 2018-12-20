@@ -107,15 +107,19 @@ def find_mobs_with_buff_v2(buff="exp", fight_boss=False):
 
     # Find all fight icons first
     locs = sorted(screen_processor.abs_search_multi("fight.png", EXP_SEARCH_REGION, precision=0.98), key=lambda x: x[0])
-    for loc in locs:
-        # for k in range(0, 2):
-        for i in range(1, 7):
-            # Decrease precision here?
-            pos = screen_processor.abs_search("{}_icon_{}.png".format(buff, i),
-                                              (loc[0]-170, loc[1], loc[0]+170, loc[1]+250),
-                                              precision=0.8)
-            if pos[0] != -1:
-                return loc, False
+    if locs:
+        if buff == "all":
+            return locs[0], False
+        elif buff == "exp":
+            for loc in locs:
+                # for k in range(0, 2):
+                for i in range(1, 7):
+                    # Decrease precision here?
+                    pos = screen_processor.abs_search("{}_icon_{}.png".format(buff, i),
+                                                      (loc[0]-170, loc[1], loc[0]+170, loc[1]+250),
+                                                      precision=0.8)
+                    if pos[0] != -1:
+                        return loc, False
 
     return (-1, -1), False
 
@@ -555,11 +559,13 @@ def do_main_loop(run_time, start_time=time.time(), hwnd=None):
         fight_boss = BotConfig().should_fight_boss()
         just_battled = False
         battle_count = 0
+        buff_type = bot_cfg.get_property("General", "buff_type")
         while True:
             if fight_boss and battle_count >=3 and just_battled:
                 # Wait on screen a little bit in case boss appears
                 time.sleep(1 + move_screen * 0.1)
-            mob_pos, is_boss = find_mobs_with_buff_v2(fight_boss=(fight_boss and battle_count >=3))
+            mob_pos, is_boss = find_mobs_with_buff_v2(buff=buff_type if buff_type else "exp",
+                                                      fight_boss=(fight_boss and battle_count >=3))
             if mob_pos[0] != -1:
                 # Found mob!
                 process_battle(mob_pos, is_boss)
@@ -725,15 +731,16 @@ def do_realm_battle(i, j, row, win_streak, tries=0):
     center_x, center_y = realm_obj.get_center_point(i, j)
     logger.info("Center: {} {}".format(center_x, center_y))
     emu_manager.mouse_click(center_x, center_y, 1)
+    time.sleep(0.5)
     # emu_manager.mouse_click(center_x + 70, center_y + 150, 0.7)
-    atk_btn = screen_processor.abs_search("realm_atk_btn.png", click=True)
+    atk_btn = screen_processor.abs_search("realm_atk_btn.png", precision=0.93, click=True)
     # Fail safe this
     if atk_btn[0] == -1:
         return False, False
 
     # Another fail safe
     time.sleep(5)
-    atk_btn = screen_processor.abs_search("realm_atk_btn.png")
+    atk_btn = screen_processor.abs_search("realm_atk_btn.png", precision=0.93)
     # If the atk button is still there, we probably ran out of tickets
     if atk_btn[0] != -1:
         logger.info("Could not get to battle screen for game {}! Maybe we ran out of tickets?..".format(i * 3 + j + 1))
@@ -775,7 +782,7 @@ def do_realm_battle(i, j, row, win_streak, tries=0):
         emu_manager.mouse_click(153, 573, sleep=1)
         emu_manager.mouse_click(153, 573, sleep=1)
 
-    time.sleep(1)
+    time.sleep(2)
     # Check win and return
     return win, True
 
@@ -788,7 +795,7 @@ def go_to_main_screen():
             time.sleep(1)
 
         # Work around for Nox launcher bug
-        screen_processor.abs_search("nox_error.png", precision=0.9, click=True)
+        # screen_processor.abs_search("nox_error.png", precision=0.9, click=True)
         # Policy button, in case we log in while another device is currently logged in
         screen_processor.abs_search("confirm_policy_btn.png", click=True)
         time.sleep(1.5)
