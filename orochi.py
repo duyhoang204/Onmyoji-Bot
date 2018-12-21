@@ -77,6 +77,11 @@ class Orochi:
                 # Deny wanted req
                 logger.info("WANTED FOUND!")
                 emu_manager.mouse_click(*WANTED_CANCEL)
+            idle = screen_processor.abs_search("wait.png", precision=0.94)
+            if idle[0] != -1:
+                # App not responding
+                logger.info("Idling!")
+                emu_manager.mouse_click(idle[0], idle[1]-20)
             if screen_processor.abs_search("party_gear.png", click=True)[0] != -1:
                 # Auto join party
                 logger.info("Auto joining party...!")

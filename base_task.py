@@ -17,6 +17,10 @@ class BaseTask:
                 # Deny wanted req
                 logger.info("WANTED FOUND!")
                 emu_manager.mouse_click(*WANTED_CANCEL)
-
+            idle = screen_processor.abs_search("wait.png", precision=0.94)
+            if idle[0] != -1:
+                # App not responding
+                logger.info("Idling!")
+                emu_manager.mouse_click(idle[0], idle[1]-20)
             time.sleep(1)
         logger.info("End hunting for in-game popup.")
